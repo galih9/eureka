@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/perks/perk_definition.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+perk_id = "roy_backup"
+perk_name = "Backup"
+description = "If Roy is defeated while allies remain, he revives once with restored HP and +35% Attack, but becomes Exhausted."
+activation_type = 0
+duration_turns = 0
+cooldown_turns = 0
+params = {}

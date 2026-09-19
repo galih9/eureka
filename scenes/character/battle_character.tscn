@@ -1,0 +1,52 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/battle_character.gd" id="1_char"]
+[ext_resource type="SpriteFrames" path="res://data/character_sprite_frames.tres" id="2_frames"]
+
+[node name="BattleCharacter" type="Node2D"]
+script = ExtResource("1_char")
+
+[node name="CameraMarker" type="Marker2D" parent="."]
+position = Vector2(0, -32)
+
+[node name="TargetMarker" type="Marker2D" parent="."]
+position = Vector2(0, -64)
+
+[node name="AttackOrigin" type="Marker2D" parent="."]
+position = Vector2(28, -20)
+
+[node name="HitOrigin" type="Marker2D" parent="."]
+position = Vector2(0, -20)
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Shadow" type="Polygon2D" parent="Visual"]
+color = Color(0.04, 0.06, 0.1, 0.45)
+polygon = PackedVector2Array(-20, 0, -14, -5, 0, -7, 14, -5, 20, 0, 14, 5, 0, 7, -14, 5)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visual"]
+scale = Vector2(2.4, 2.4)
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+
+[node name="Indicators" type="Node2D" parent="."]
+
+[node name="TargetIndicator" type="Node2D" parent="Indicators"]
+visible = false
+position = Vector2(0, -62)
+
+[node name="Arrow" type="Polygon2D" parent="Indicators/TargetIndicator"]
+color = Color(1, 0.88, 0.2, 0.95)
+polygon = PackedVector2Array(-9, -16, 9, -16, 0, 0)
+
+[node name="ArrowInner" type="Polygon2D" parent="Indicators/TargetIndicator"]
+color = Color(1, 0.3, 0.2, 0.95)
+polygon = PackedVector2Array(-5, -14, 5, -14, 0, -4)
+
+[node name="SelectionIndicator" type="Node2D" parent="Indicators"]
+visible = false
+
+[node name="Ring" type="Line2D" parent="Indicators/SelectionIndicator"]
+points = PackedVector2Array(-24, 0, -16, -7, 0, -10, 16, -7, 24, 0, 16, 7, 0, 10, -24, 0)
+width = 2.0
+default_color = Color(0.3, 0.85, 1, 0.9)

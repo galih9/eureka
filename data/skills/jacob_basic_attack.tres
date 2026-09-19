@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Burst Fire"
+description = "Ranged burst attack firing multiple shots with independent accuracy."
+action_type = 1
+target_type = 3
+timeline_delay = 32.0
+is_melee = false
+skill_name = "Burst Fire"
+mp_cost = 0
+power = 90
+element = "Physical"
+accuracy = 88
+critical_chance = 0.10
+is_heal = false
+status_chance = 0.0

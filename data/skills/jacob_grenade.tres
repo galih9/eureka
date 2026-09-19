@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Grenade"
+description = "High-explosive fragmentation grenade. Enemies in the middle formation column receive severe bonus damage."
+action_type = 1
+target_type = 4
+timeline_delay = 50.0
+is_melee = false
+skill_name = "Grenade"
+mp_cost = 25
+power = 110
+element = "Fire"
+accuracy = 92
+critical_chance = 0.12
+is_heal = false
+status_chance = 0.0

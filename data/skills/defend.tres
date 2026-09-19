@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ActionDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/action_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Defend"
+description = "Brace for incoming attacks, halving damage until next turn with minimal timeline cost."
+action_type = 2
+target_type = 0
+timeline_delay = 15.0

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Quick Strike"
+description = "Fast single-target attack catching targets off-guard."
+action_type = 1
+target_type = 3
+timeline_delay = 18.0
+is_melee = true
+skill_name = "Quick Strike"
+mp_cost = 8
+power = 75
+element = "Physical"
+accuracy = 95
+critical_chance = 0.08
+is_heal = false
+status_chance = 0.0

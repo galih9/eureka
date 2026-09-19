@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+[ext_resource type="Resource" path="res://data/status_effects/disarm.tres" id="2_disarm"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Disarm Slash"
+skill_name = "Disarm Slash"
+description = "A precise slash targeting the enemy weapon arm, blocking basic attacks."
+action_type = 1
+target_type = 3
+timeline_delay = 24.0
+mp_cost = 10
+power = 90
+element = "Physical"
+accuracy = 95
+critical_chance = 0.08
+is_heal = false
+status_to_apply = ExtResource("2_disarm")
+status_chance = 1.0

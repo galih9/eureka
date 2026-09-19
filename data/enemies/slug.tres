@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
+[ext_resource type="Resource" path="res://data/skills/slug_basic_attack.tres" id="2_atk"]
+[ext_resource type="Resource" path="res://data/skills/slug_mass_heal.tres" id="3_hel"]
+[ext_resource type="Resource" path="res://data/skills/slug_area_attack.tres" id="4_aoe"]
+[ext_resource type="Resource" path="res://data/skills/slug_long_stun.tres" id="5_stn"]
+
+[resource]
+script = ExtResource("1_char")
+codename = "SLUG"
+display_name = "Slug"
+team = 1
+archetype = 0
+max_hp = 220
+max_mp = 50
+attack = 26
+defense = 10
+agility = 22
+accuracy = 92
+evasion = 14
+skills = [ExtResource("2_atk"), ExtResource("3_hel"), ExtResource("4_aoe"), ExtResource("5_stn")]
+perks = []
+accent_color = Color(0.8, 0.35, 0.9, 1)

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Protect"
+description = "Roy guards an ally, intercepting enemy attacks and preventing disruption of their action."
+action_type = 1
+target_type = 1
+timeline_delay = 20.0
+is_melee = false
+skill_name = "Protect"
+mp_cost = 15
+power = 0
+element = "Support"
+accuracy = 100
+critical_chance = 0.0
+is_heal = false
+status_chance = 0.0

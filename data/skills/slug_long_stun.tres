@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/status_effects/stun.tres" id="2_stn"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Neuro Shock"
+description = "Long telegraphed electrical discharge that inflicts Stun on hit. Highly dangerous but interruptible."
+action_type = 1
+target_type = 3
+timeline_delay = 58.0
+is_melee = false
+skill_name = "Neuro Shock"
+mp_cost = 25
+power = 100
+element = "Lightning"
+accuracy = 95
+critical_chance = 0.15
+is_heal = false
+status_to_apply = ExtResource("2_stn")
+status_chance = 1.0

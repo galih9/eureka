@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://dpt13mb35kgs1"]
+
+[ext_resource type="Script" uid="uid://wnav8kk01xl8" path="res://scripts/core/battle_scene.gd" id="1_scene"]
+[ext_resource type="PackedScene" uid="uid://b5uev31rcemb6" path="res://scenes/arena/battlefield_arena.tscn" id="2_arena"]
+[ext_resource type="Script" uid="uid://cwy7m72j7ydrp" path="res://scripts/camera/battle_camera_controller.gd" id="3_cam"]
+[ext_resource type="Script" uid="uid://dxx60e3yn2iys" path="res://scripts/core/battle_manager.gd" id="4_mgr"]
+[ext_resource type="PackedScene" path="res://scenes/character/battle_character.tscn" id="5_char"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_ui.tscn" id="6_ui"]
+[ext_resource type="Resource" path="res://data/skills/normal_attack.tres" id="7_atk"]
+[ext_resource type="Resource" path="res://data/skills/defend.tres" id="8_def"]
+[ext_resource type="Resource" path="res://data/characters/roy.tres" id="9_roy"]
+[ext_resource type="Resource" path="res://data/characters/ingrid.tres" id="10_ingrid"]
+[ext_resource type="Resource" path="res://data/characters/jacob.tres" id="11_jacob"]
+[ext_resource type="Resource" path="res://data/enemies/slime.tres" id="13_slime"]
+[ext_resource type="Resource" path="res://data/enemies/slug.tres" id="14_slug"]
+[ext_resource type="Resource" path="res://data/skills/move.tres" id="15_move"]
+
+[node name="BattleScene" type="Node2D"]
+script = ExtResource("1_scene")
+
+[node name="BattlefieldArena" parent="." instance=ExtResource("2_arena")]
+
+[node name="BattleCameraController" type="Node2D" parent="." node_paths=PackedStringArray("camera")]
+script = ExtResource("3_cam")
+camera = NodePath("Camera2D")
+
+[node name="Camera2D" type="Camera2D" parent="BattleCameraController"]
+position = Vector2(576, 324)
+
+[node name="BattleManager" type="Node" parent="." node_paths=PackedStringArray("camera_controller")]
+script = ExtResource("4_mgr")
+camera_controller = NodePath("../BattleCameraController")
+default_attack_skill = ExtResource("7_atk")
+default_defend_action = ExtResource("8_def")
+default_move_action = ExtResource("15_move")
+
+[node name="Combatants" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Players" type="Node2D" parent="Combatants"]
+y_sort_enabled = true
+
+[node name="Roy" parent="Combatants/Players" instance=ExtResource("5_char")]
+position = Vector2(430, 326)
+character_definition = ExtResource("9_roy")
+
+[node name="Ingrid" parent="Combatants/Players" instance=ExtResource("5_char")]
+position = Vector2(472, 280)
+character_definition = ExtResource("10_ingrid")
+
+[node name="Jacob" parent="Combatants/Players" instance=ExtResource("5_char")]
+position = Vector2(150, 326)
+character_definition = ExtResource("11_jacob")
+
+[node name="Enemies" type="Node2D" parent="Combatants"]
+y_sort_enabled = true
+
+[node name="Slime1" parent="Combatants/Enemies" instance=ExtResource("5_char")]
+position = Vector2(680, 280)
+character_definition = ExtResource("13_slime")
+display_name_override = "Slime 1"
+
+[node name="Slime2" parent="Combatants/Enemies" instance=ExtResource("5_char")]
+position = Vector2(722, 326)
+character_definition = ExtResource("13_slime")
+display_name_override = "Slime 2"
+
+[node name="Slug1" parent="Combatants/Enemies" instance=ExtResource("5_char")]
+position = Vector2(820, 280)
+character_definition = ExtResource("14_slug")
+display_name_override = "Slug 1"
+
+[node name="BattleUI" parent="." node_paths=PackedStringArray("battle_manager", "camera") instance=ExtResource("6_ui")]
+battle_manager = NodePath("../BattleManager")
+camera = NodePath("../BattleCameraController/Camera2D")

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/status/status_definition.gd" id="1_status"]
+
+[resource]
+script = ExtResource("1_status")
+status_id = "evasion_up"
+status_name = "Evasion Up"
+description = "Combatant's evasion increased by 15%."
+is_debuff = false
+duration_turns = 3
+max_stacks = 1
+dot_flat_damage = 0
+dot_percent_max_hp = 0.0
+stat_name = "evasion"
+modifier_percent = 0.15
+modifier_flat = 0.0

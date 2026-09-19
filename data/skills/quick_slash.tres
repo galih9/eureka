@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Quick Slash"
+skill_name = "Quick Slash"
+description = "A swift blade strike with minimal timeline delay."
+action_type = 1
+target_type = 3
+timeline_delay = 20.0
+mp_cost = 10
+power = 95
+element = "Physical"
+accuracy = 98
+critical_chance = 0.12
+is_heal = false
+status_chance = 1.0

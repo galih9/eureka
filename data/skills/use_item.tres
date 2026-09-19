@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ActionDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/action_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Item"
+description = "Uses a restorative combat item to recover HP."
+action_type = 3
+target_type = 1
+timeline_delay = 20.0

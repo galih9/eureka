@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/status_effects/flinch.tres" id="2_fln"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Quick Shot"
+description = "Fast precision shot inflicting Flinch to disrupt target timeline progression."
+action_type = 1
+target_type = 3
+timeline_delay = 18.0
+is_melee = false
+skill_name = "Quick Shot"
+mp_cost = 14
+power = 85
+element = "Physical"
+accuracy = 96
+critical_chance = 0.10
+is_heal = false
+status_to_apply = ExtResource("2_fln")
+status_chance = 1.0

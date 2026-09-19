@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/status_effects/silence.tres" id="2_sil"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Silence"
+description = "Applies Silence to one enemy, sealing their skill usage."
+action_type = 1
+target_type = 3
+timeline_delay = 22.0
+is_melee = false
+skill_name = "Silence"
+mp_cost = 15
+power = 40
+element = "Arcane"
+accuracy = 95
+critical_chance = 0.05
+is_heal = false
+status_to_apply = ExtResource("2_sil")
+status_chance = 1.0

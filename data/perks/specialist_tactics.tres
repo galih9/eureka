@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/perks/perk_definition.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+perk_id = "specialist_tactics"
+perk_name = "Tactical Foresight"
+description = "When enemies repeatedly fail to hit the Specialist (2 misses), grants the active party +20% Agility and +15% Evasion for 3 turns."
+activation_type = 1
+duration_turns = 3
+cooldown_turns = 2
+params = {
+"evade_threshold": 2,
+"team_agi_pct": 0.2,
+"team_eva_pct": 0.15
+}

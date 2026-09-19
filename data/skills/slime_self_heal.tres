@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Self Heal"
+description = "Slime regenerates its own gelatinous body to restore HP."
+action_type = 1
+target_type = 0
+timeline_delay = 25.0
+is_melee = false
+skill_name = "Self Heal"
+mp_cost = 10
+power = 70
+element = "Nature"
+accuracy = 100
+critical_chance = 0.0
+is_heal = true
+status_chance = 0.0

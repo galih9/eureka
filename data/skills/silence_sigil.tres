@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+[ext_resource type="Resource" path="res://data/status_effects/silence.tres" id="2_silence"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Silence Sigil"
+skill_name = "Silence Sigil"
+description = "Inflicts silence, blocking the target from casting skills when reaching command tick."
+action_type = 1
+target_type = 3
+timeline_delay = 35.0
+is_melee = false
+mp_cost = 12
+power = 80
+element = "Magic"
+accuracy = 95
+critical_chance = 0.05
+is_heal = false
+status_to_apply = ExtResource("2_silence")
+status_chance = 1.0

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Mass Small Heal"
+description = "Emits rejuvenating spores, restoring a small amount of HP to all allies."
+action_type = 1
+target_type = 2
+timeline_delay = 30.0
+is_melee = false
+skill_name = "Mass Small Heal"
+mp_cost = 15
+power = 35
+element = "Nature"
+accuracy = 100
+critical_chance = 0.0
+is_heal = true
+status_chance = 0.0

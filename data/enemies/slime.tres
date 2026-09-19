@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
+[ext_resource type="Resource" path="res://data/skills/slime_basic_attack.tres" id="2_atk"]
+[ext_resource type="Resource" path="res://data/skills/slime_self_heal.tres" id="3_hel"]
+[ext_resource type="Resource" path="res://data/skills/slime_quick_attack.tres" id="4_qck"]
+[ext_resource type="Resource" path="res://data/skills/slime_silence.tres" id="5_sil"]
+
+[resource]
+script = ExtResource("1_char")
+codename = "SLIME"
+display_name = "Slime"
+team = 1
+archetype = 0
+max_hp = 280
+max_mp = 40
+attack = 28
+defense = 14
+agility = 11
+accuracy = 90
+evasion = 6
+skills = [ExtResource("2_atk"), ExtResource("3_hel"), ExtResource("4_qck"), ExtResource("5_sil")]
+perks = []
+accent_color = Color(0.3, 0.95, 0.35, 1)

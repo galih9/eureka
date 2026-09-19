@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/perks/perk_definition.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+perk_id = "striker_focus"
+perk_name = "Keen Edge"
+description = "After 3 consecutive misses, awakens razor focus. The next attack is guaranteed to HIT and guaranteed to be a CRITICAL strike."
+activation_type = 3
+duration_turns = 0
+cooldown_turns = 2
+params = {
+"miss_threshold": 3
+}

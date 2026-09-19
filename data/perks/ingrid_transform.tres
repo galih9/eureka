@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/perks/perk_definition.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+perk_id = "ingrid_transform"
+perk_name = "Transform"
+description = "When HP reaches 20% or lower, transforms for 3 turns: +40% Attack, guaranteed critical, and 50% Lifesteal on next hit."
+activation_type = 1
+duration_turns = 3
+cooldown_turns = 0
+params = {}

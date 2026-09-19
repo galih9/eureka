@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/perks/perk_definition.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+perk_id = "brute_awaken"
+perk_name = "Unstoppable Fury"
+description = "Awakens when an ally falls in battle, permanently increasing Max HP (+30%) and Attack (+25%). Next strike is guaranteed critical and inflicts Bleed."
+activation_type = 0
+duration_turns = 0
+cooldown_turns = 0
+params = {
+"atk_bonus_pct": 0.25,
+"hp_bonus_pct": 0.3
+}

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Precision Shot"
+skill_name = "Precision Shot"
+description = "A meticulously calculated shot with 100% accuracy and high critical rate."
+action_type = 1
+target_type = 3
+timeline_delay = 30.0
+is_melee = false
+mp_cost = 12
+power = 125
+element = "Physical"
+accuracy = 100
+critical_chance = 0.25
+is_heal = false
+status_chance = 1.0

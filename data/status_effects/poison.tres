@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/status/status_definition.gd" id="1_status"]
+
+[resource]
+script = ExtResource("1_status")
+status_id = "poison"
+status_name = "Poison"
+description = "Suffering corrosive bio-poison damage on turn start."
+is_debuff = true
+duration_turns = 3
+max_stacks = 3
+dot_flat_damage = 18
+dot_percent_max_hp = 0.04
+stat_name = ""
+modifier_percent = 0.0
+modifier_flat = 0.0

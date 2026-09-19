@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Heal"
+skill_name = "Mending Light"
+description = "Restores hit points to a chosen ally."
+action_type = 1
+target_type = 1
+timeline_delay = 25.0
+is_melee = false
+mp_cost = 18
+power = 130
+element = "Holy"
+accuracy = 100
+critical_chance = 0.0
+is_heal = true
+status_chance = 1.0

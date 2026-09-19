@@ -1,0 +1,4 @@
+SCRIPT ERROR: Assertion failed: Expected 3 initial enemies, got 0
+   at: _init (res://test_run.gd:34)
+   GDScript backtrace (most recent call first):
+       [0] _init (res://test_run.gd:34)

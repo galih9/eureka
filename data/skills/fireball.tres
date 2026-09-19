@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Fireball"
+skill_name = "Fireball"
+description = "Unleashes an exploding fire sphere hitting ALL enemies."
+action_type = 1
+target_type = 4
+timeline_delay = 45.0
+is_melee = false
+mp_cost = 25
+power = 110
+element = "Fire"
+accuracy = 92
+critical_chance = 0.05
+is_heal = false
+status_chance = 1.0

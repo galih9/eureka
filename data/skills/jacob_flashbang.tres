@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/status_effects/silence.tres" id="2_sil"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Flashbang"
+description = "Tactical flash grenade hitting all enemies. Applies Silence with high chance on front-column targets."
+action_type = 1
+target_type = 4
+timeline_delay = 52.0
+is_melee = false
+skill_name = "Flashbang"
+mp_cost = 22
+power = 40
+element = "Light"
+accuracy = 95
+critical_chance = 0.05
+is_heal = false
+status_to_apply = ExtResource("2_sil")
+status_chance = 1.0

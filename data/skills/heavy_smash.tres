@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+[ext_resource type="Resource" path="res://data/status_effects/stun.tres" id="2_stun"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Heavy Smash"
+skill_name = "Heavy Smash"
+description = "A devastating blow that deals huge physical damage and stuns the target."
+action_type = 1
+target_type = 3
+timeline_delay = 55.0
+mp_cost = 15
+power = 180
+element = "Physical"
+accuracy = 88
+critical_chance = 0.15
+is_heal = false
+status_to_apply = ExtResource("2_stun")
+status_chance = 1.0

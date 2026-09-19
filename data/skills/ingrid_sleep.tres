@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/status_effects/sleep.tres" id="2_slp"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Sleep"
+description = "Applies Sleep to one enemy, temporarily halting their timeline progress."
+action_type = 1
+target_type = 3
+timeline_delay = 25.0
+is_melee = false
+skill_name = "Sleep"
+mp_cost = 20
+power = 30
+element = "Arcane"
+accuracy = 90
+critical_chance = 0.05
+is_heal = false
+status_to_apply = ExtResource("2_slp")
+status_chance = 1.0

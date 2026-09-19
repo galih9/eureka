@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_act"]
+
+[resource]
+script = ExtResource("1_act")
+action_name = "Heavy Strike"
+description = "Melee strike with deliberate follow-through."
+action_type = 1
+target_type = 3
+timeline_delay = 35.0
+is_melee = true
+skill_name = "Heavy Strike"
+mp_cost = 0
+power = 95
+element = "Physical"
+accuracy = 92
+critical_chance = 0.08
+is_heal = false
+status_chance = 0.0

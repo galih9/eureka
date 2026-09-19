@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
+[ext_resource type="Resource" path="res://data/skills/jacob_basic_attack.tres" id="2_atk"]
+[ext_resource type="Resource" path="res://data/skills/jacob_flashbang.tres" id="3_fls"]
+[ext_resource type="Resource" path="res://data/skills/jacob_grenade.tres" id="4_grn"]
+[ext_resource type="Resource" path="res://data/skills/jacob_quick_shot.tres" id="5_qck"]
+
+[resource]
+script = ExtResource("1_char")
+codename = "JACOB"
+display_name = "Jacob"
+team = 0
+archetype = 3
+max_hp = 510
+max_mp = 55
+attack = 38
+defense = 16
+agility = 18
+accuracy = 92
+evasion = 12
+skills = [ExtResource("2_atk"), ExtResource("3_fls"), ExtResource("4_grn"), ExtResource("5_qck")]
+perks = []
+accent_color = Color(0.2, 0.8, 0.9, 1)

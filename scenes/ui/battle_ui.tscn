@@ -1,0 +1,489 @@
+[gd_scene format=3 uid="uid://cp2vvh3n4lbl7"]
+
+[ext_resource type="Script" uid="uid://bmwbbpjj2g6yr" path="res://scripts/ui/battle_ui.gd" id="1_bui"]
+[ext_resource type="Script" uid="uid://tty3gjvomj0b" path="res://scripts/ui/timeline_ui.gd" id="2_time"]
+[ext_resource type="Script" uid="uid://c7xb6g6md5aop" path="res://scripts/ui/character_status_ui.gd" id="3_stat"]
+[ext_resource type="Script" uid="uid://cuxod7swv6ncs" path="res://scripts/ui/command_menu_ui.gd" id="4_cmd"]
+[ext_resource type="Script" uid="uid://d0p806q14kee0" path="res://scripts/ui/enemy_info_ui.gd" id="5_enm"]
+[ext_resource type="Script" uid="uid://hkh5spl5kxd2" path="res://scripts/ui/perk_notification_ui.gd" id="6_perk"]
+[ext_resource type="Script" uid="uid://bdvkt5lfa1oko" path="res://scripts/ui/floating_text_spawner.gd" id="7_flt"]
+[ext_resource type="Resource" path="res://data/skills/normal_attack.tres" id="8_atk"]
+[ext_resource type="Resource" path="res://data/skills/defend.tres" id="9_def"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tl"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_status"]
+bg_color = Color(0.08, 0.12, 0.2, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.6, 1, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmd"]
+bg_color = Color(0.08, 0.1, 0.18, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.8, 0.2, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_perk"]
+bg_color = Color(0.12, 0.08, 0.22, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.75, 0.1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_banner"]
+bg_color = Color(0.05, 0.08, 0.15, 0.85)
+border_width_top = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 1, 0.8)
+
+[node name="BattleUI" type="CanvasLayer" unique_id=101724874]
+script = ExtResource("1_bui")
+
+[node name="TimelineLayer" type="Control" parent="." unique_id=1642451508]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 110.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="TimelineUI" type="PanelContainer" parent="TimelineLayer" unique_id=1623647683]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -440.0
+offset_top = 6.0
+offset_right = 440.0
+offset_bottom = 106.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_tl")
+script = ExtResource("2_time")
+
+[node name="MarginContainer" type="MarginContainer" parent="TimelineLayer/TimelineUI" unique_id=715952199]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TimelineLayer/TimelineUI/MarginContainer" unique_id=1604327851]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="BattlefieldIndicators" type="Control" parent="." unique_id=1554263123]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="FloatingTextSpawner" type="Control" parent="BattlefieldIndicators" unique_id=1763688160]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_flt")
+
+[node name="CharacterStatusLayer" type="Control" parent="." unique_id=1617376128]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CharacterStatusUI" type="Control" parent="CharacterStatusLayer" unique_id=361656712]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_stat")
+
+[node name="ActivePanel" type="PanelContainer" parent="CharacterStatusLayer/CharacterStatusUI" unique_id=1905724990]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -145.0
+offset_right = 230.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_status")
+
+[node name="VBox" type="VBoxContainer" parent="CharacterStatusLayer/CharacterStatusUI/ActivePanel" unique_id=100612771]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="CharacterStatusLayer/CharacterStatusUI/ActivePanel/VBox" unique_id=1746931873]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "HERO"
+
+[node name="HPBar" type="ProgressBar" parent="CharacterStatusLayer/CharacterStatusUI/ActivePanel/VBox" unique_id=10002349]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+show_percentage = false
+
+[node name="HPText" type="Label" parent="CharacterStatusLayer/CharacterStatusUI/ActivePanel/VBox/HPBar" unique_id=2069258984]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 11
+text = "HP: 500 / 500"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MPBar" type="ProgressBar" parent="CharacterStatusLayer/CharacterStatusUI/ActivePanel/VBox" unique_id=1419948048]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+show_percentage = false
+
+[node name="MPText" type="Label" parent="CharacterStatusLayer/CharacterStatusUI/ActivePanel/VBox/MPBar" unique_id=1479251180]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+text = "MP: 50 / 50"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PerkTags" type="Label" parent="CharacterStatusLayer/CharacterStatusUI/ActivePanel/VBox" unique_id=2130709542]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 10
+text = "[READY]"
+
+[node name="PartyContainer" type="HBoxContainer" parent="CharacterStatusLayer/CharacterStatusUI" unique_id=964023649]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -145.0
+offset_right = 490.0
+offset_bottom = -15.0
+grow_vertical = 0
+theme_override_constants/separation = 10
+
+[node name="EnemyInfoLayer" type="Control" parent="." unique_id=1666607976]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EnemyInfoUI" type="PanelContainer" parent="EnemyInfoLayer" unique_id=206607604]
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -230.0
+offset_top = 70.0
+offset_right = -20.0
+offset_bottom = 150.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_status")
+script = ExtResource("5_enm")
+
+[node name="VBox" type="VBoxContainer" parent="EnemyInfoLayer/EnemyInfoUI" unique_id=1534819022]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="EnemyInfoLayer/EnemyInfoUI/VBox" unique_id=1759631669]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "MECH DRONE"
+
+[node name="HPBar" type="ProgressBar" parent="EnemyInfoLayer/EnemyInfoUI/VBox" unique_id=914784928]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="EnemyInfoLayer/EnemyInfoUI/VBox/HPBar" unique_id=1731009079]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+text = "380 / 380"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="EnemyInfoLayer/EnemyInfoUI/VBox" unique_id=587947565]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "Status: Normal"
+
+[node name="CommandLayer" type="Control" parent="." unique_id=651478837]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CommandMenuUI" type="Control" parent="CommandLayer" unique_id=1433460443]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -190.0
+offset_top = -235.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("4_cmd")
+default_attack_action = ExtResource("8_atk")
+default_defend_action = ExtResource("9_def")
+
+[node name="MainContainer" type="VBoxContainer" parent="CommandLayer/CommandMenuUI" unique_id=32997153]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="BtnAttack" type="Button" parent="CommandLayer/CommandMenuUI/MainContainer" unique_id=754818997]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "⚔ ATTACK"
+
+[node name="BtnSkill" type="Button" parent="CommandLayer/CommandMenuUI/MainContainer" unique_id=263530586]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "✦ SKILL"
+
+[node name="BtnDefend" type="Button" parent="CommandLayer/CommandMenuUI/MainContainer" unique_id=395511514]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "🛡 DEFEND"
+
+[node name="BtnItem" type="Button" parent="CommandLayer/CommandMenuUI/MainContainer" unique_id=715368337]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "🧪 ITEM"
+
+[node name="BtnMove" type="Button" parent="CommandLayer/CommandMenuUI/MainContainer" unique_id=819283741]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "📍 MOVE (8 MP)"
+
+[node name="BtnTactics" type="Button" parent="CommandLayer/CommandMenuUI/MainContainer" unique_id=928374821]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "⚙ TACTICS: [ATTACK]"
+
+[node name="SkillContainer" type="VBoxContainer" parent="CommandLayer/CommandMenuUI" unique_id=1946455562]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CommandLayer/CommandMenuUI/SkillContainer" unique_id=1959689421]
+custom_minimum_size = Vector2(0, 115)
+layout_mode = 2
+
+[node name="SkillList" type="VBoxContainer" parent="CommandLayer/CommandMenuUI/SkillContainer/ScrollContainer" unique_id=2080918568]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="BtnBack" type="Button" parent="CommandLayer/CommandMenuUI/SkillContainer" unique_id=316759286]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "◄ BACK"
+
+[node name="TargetLayer" type="Control" parent="." unique_id=375171313]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PromptPanel" type="PanelContainer" parent="TargetLayer" unique_id=1269096900]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -180.0
+offset_top = -110.0
+offset_right = 180.0
+offset_bottom = -75.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_cmd")
+
+[node name="PromptLabel" type="Label" parent="TargetLayer/PromptPanel" unique_id=1031855537]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "SELECT TARGET: [A / D] Cycle  •  [ENTER] Confirm  •  [ESC] Cancel"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PerkNotificationLayer" type="Control" parent="." unique_id=225854591]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PerkNotificationUI" type="PanelContainer" parent="PerkNotificationLayer" unique_id=900137039]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -110.0
+offset_right = 220.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_perk")
+script = ExtResource("6_perk")
+
+[node name="VBox" type="VBoxContainer" parent="PerkNotificationLayer/PerkNotificationUI" unique_id=658653654]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="PerkNotificationLayer/PerkNotificationUI/VBox" unique_id=1697048358]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 18
+text = "⚡ PERK AWAKENED! ⚡"
+horizontal_alignment = 1
+
+[node name="DescLabel" type="Label" parent="PerkNotificationLayer/PerkNotificationUI/VBox" unique_id=1439576985]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Effect details here"
+horizontal_alignment = 1
+
+[node name="BattleMessageLayer" type="Control" parent="." unique_id=1826048609]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ActionBanner" type="Label" parent="BattleMessageLayer" unique_id=547565666]
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 70.0
+offset_bottom = 105.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_banner")
+text = "Action Announcement"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TransitionLayer" type="Control" parent="." unique_id=1975247911]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EndPanel" type="PanelContainer" parent="TransitionLayer" unique_id=39525062]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -90.0
+offset_right = 160.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_perk")
+
+[node name="VBox" type="VBoxContainer" parent="TransitionLayer/EndPanel" unique_id=821986479]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="EndTitle" type="Label" parent="TransitionLayer/EndPanel/VBox" unique_id=670810092]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 26
+text = "★ VICTORY ★"
+horizontal_alignment = 1
+
+[node name="RestartBtn" type="Button" parent="TransitionLayer/EndPanel/VBox" unique_id=1146181959]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "PLAY AGAIN"
