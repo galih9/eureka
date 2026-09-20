@@ -363,9 +363,9 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -180.0
+offset_left = -220.0
 offset_top = -110.0
-offset_right = 180.0
+offset_right = 220.0
 offset_bottom = -75.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -373,8 +373,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_cmd")
 
 [node name="PromptLabel" type="Label" parent="TargetLayer/PromptPanel" unique_id=1031855537]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
-text = "SELECT TARGET: [A / D] Cycle  •  [ENTER] Confirm  •  [ESC] Cancel"
+theme_override_font_sizes/font_size = 12
+text = "SELECT TARGET: [Left Click / Enter] Confirm  •  [Right Click / Esc] Cancel  •  [A / D] Cycle"
 horizontal_alignment = 1
 vertical_alignment = 1
 

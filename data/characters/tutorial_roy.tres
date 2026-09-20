@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
+[ext_resource type="Resource" path="res://data/skills/roy_basic_attack.tres" id="2_atk"]
+[ext_resource type="Resource" path="res://data/skills/roy_tackle.tres" id="3_tck"]
+[ext_resource type="Resource" path="res://data/skills/flinch_strike.tres" id="4_fln"]
+[ext_resource type="Resource" path="res://data/perks/roy_backup.tres" id="5_bck"]
+[ext_resource type="Texture2D" path="res://assets/banner/male.png" id="6_bnr"]
+
+[resource]
+script = ExtResource("1_char")
+codename = "ROY"
+display_name = "Roy"
+archetype = 1
+banner = ExtResource("6_bnr")
+max_hp = 620
+max_mp = 60
+attack = 36
+defense = 22
+agility = 14
+evasion = 8
+skills = [ExtResource("2_atk"), ExtResource("3_tck"), ExtResource("4_fln")]
+perks = [ExtResource("5_bck")]
+accent_color = Color(0.9, 0.25, 0.2, 1)

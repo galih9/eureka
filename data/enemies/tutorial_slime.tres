@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
+[ext_resource type="Resource" path="res://data/skills/slime_basic_attack.tres" id="2_atk"]
+[ext_resource type="Resource" path="res://data/skills/tutorial_heavy_slam.tres" id="3_slm"]
+[ext_resource type="Resource" path="res://data/skills/tutorial_acid_dart.tres" id="4_drt"]
+
+[resource]
+script = ExtResource("1_char")
+codename = "TRAINING_SLIME"
+display_name = "Training Slime"
+team = 1
+archetype = 0
+max_hp = 2000
+max_mp = 100
+attack = 12
+defense = 12
+agility = 10
+accuracy = 95
+evasion = 5
+skills = [ExtResource("2_atk"), ExtResource("3_slm"), ExtResource("4_drt")]
+perks = []
+accent_color = Color(0.3, 0.95, 0.35, 1)

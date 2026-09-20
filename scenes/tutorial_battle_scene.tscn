@@ -1,0 +1,59 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/tutorial/tutorial_battle_scene.gd" id="1_scene"]
+[ext_resource type="PackedScene" path="res://scenes/arena/battlefield_arena.tscn" id="2_arena"]
+[ext_resource type="Script" path="res://scripts/camera/battle_camera_controller.gd" id="3_cam"]
+[ext_resource type="Script" path="res://scripts/tutorial/tutorial_manager.gd" id="4_mgr"]
+[ext_resource type="PackedScene" path="res://scenes/character/battle_character.tscn" id="5_char"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_ui.tscn" id="6_ui"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tutorial_ui.tscn" id="7_tui"]
+[ext_resource type="Resource" path="res://data/skills/normal_attack.tres" id="8_atk"]
+[ext_resource type="Resource" path="res://data/skills/defend.tres" id="9_def"]
+[ext_resource type="Resource" path="res://data/skills/move.tres" id="10_move"]
+[ext_resource type="Resource" path="res://data/characters/tutorial_roy.tres" id="11_roy"]
+[ext_resource type="Resource" path="res://data/enemies/tutorial_slime.tres" id="12_slime"]
+
+[node name="TutorialBattleScene" type="Node2D"]
+script = ExtResource("1_scene")
+
+[node name="BattlefieldArena" parent="." instance=ExtResource("2_arena")]
+
+[node name="BattleCameraController" type="Node2D" parent="." node_paths=PackedStringArray("camera")]
+script = ExtResource("3_cam")
+camera = NodePath("Camera2D")
+
+[node name="Camera2D" type="Camera2D" parent="BattleCameraController"]
+position = Vector2(576, 324)
+
+[node name="TutorialManager" type="Node" parent="." node_paths=PackedStringArray("camera_controller", "tutorial_ui")]
+script = ExtResource("4_mgr")
+camera_controller = NodePath("../BattleCameraController")
+default_attack_skill = ExtResource("8_atk")
+default_defend_action = ExtResource("9_def")
+default_move_action = ExtResource("10_move")
+tutorial_ui = NodePath("../TutorialUI")
+
+[node name="Combatants" type="Node2D" parent="."]
+y_sort_enabled = true
+position = Vector2(0, 65)
+
+[node name="Players" type="Node2D" parent="Combatants"]
+y_sort_enabled = true
+
+[node name="Roy" parent="Combatants/Players" instance=ExtResource("5_char")]
+position = Vector2(430, 326)
+character_definition = ExtResource("11_roy")
+
+[node name="Enemies" type="Node2D" parent="Combatants"]
+y_sort_enabled = true
+
+[node name="Slime" parent="Combatants/Enemies" instance=ExtResource("5_char")]
+position = Vector2(680, 280)
+character_definition = ExtResource("12_slime")
+display_name_override = "Training Slime"
+
+[node name="BattleUI" parent="." node_paths=PackedStringArray("battle_manager", "camera") instance=ExtResource("6_ui")]
+battle_manager = NodePath("../TutorialManager")
+camera = NodePath("../BattleCameraController/Camera2D")
+
+[node name="TutorialUI" parent="." instance=ExtResource("7_tui")]

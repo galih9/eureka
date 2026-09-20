@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/action/skill_definition.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+action_name = "Acid Dart"
+description = "A ranged acidic dart projectile aimed at a specific formation tile."
+action_type = 1
+target_type = 3
+timeline_delay = 60.0
+is_melee = false
+skill_name = "Acid Dart"
+mp_cost = 0
+power = 60
+element = "Poison"
+accuracy = 95
+critical_chance = 0.05
+is_heal = false
+status_chance = 0.0

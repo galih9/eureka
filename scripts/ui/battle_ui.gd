@@ -255,6 +255,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
 		_cancel_target()
 		get_viewport().set_input_as_handled()
+		
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_confirm_target()
+			get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			_cancel_target()
+			get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			if not TargetSystem.is_aoe(pending_action_def.target_type) and not valid_targets.is_empty():
+				selected_target_idx = (selected_target_idx + 1) % valid_targets.size()
+				_update_target_selection()
+				get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			if not TargetSystem.is_aoe(pending_action_def.target_type) and not valid_targets.is_empty():
+				selected_target_idx = (selected_target_idx - 1 + valid_targets.size()) % valid_targets.size()
+				_update_target_selection()
+				get_viewport().set_input_as_handled()
 
 func _confirm_target() -> void:
 	if not is_targeting or valid_targets.is_empty():
