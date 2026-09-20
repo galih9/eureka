@@ -102,7 +102,7 @@ func _setup_overhead_ui() -> void:
 		
 	overhead_container = Node2D.new()
 	overhead_container.name = "OverheadUI"
-	overhead_container.position = Vector2(0, -68)
+	overhead_container.position = Vector2(0, -82)
 	add_child(overhead_container)
 	
 	# Mini Overhead HP bar (displayed for enemies by default)
@@ -448,8 +448,7 @@ func play_move() -> void:
 func play_attack() -> void:
 	if animated_sprite == null or is_dead:
 		return
-	# Attack frame is 80x64 vs 48x48. Offset Y by -8 keeps feet grounded
-	animated_sprite.offset = Vector2(0, -8)
+	animated_sprite.offset = Vector2.ZERO
 	if animated_sprite.sprite_frames.has_animation(&"attack"):
 		animated_sprite.play(&"attack")
 

@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://cwy7m72j7ydrp" path="res://scripts/camera/battle_camera_controller.gd" id="3_cam"]
 [ext_resource type="Script" uid="uid://dxx60e3yn2iys" path="res://scripts/core/battle_manager.gd" id="4_mgr"]
 [ext_resource type="PackedScene" path="res://scenes/character/battle_character.tscn" id="5_char"]
-[ext_resource type="PackedScene" path="res://scenes/ui/battle_ui.tscn" id="6_ui"]
+[ext_resource type="PackedScene" uid="uid://cp2vvh3n4lbl7" path="res://scenes/ui/battle_ui.tscn" id="6_ui"]
 [ext_resource type="Resource" path="res://data/skills/normal_attack.tres" id="7_atk"]
 [ext_resource type="Resource" path="res://data/skills/defend.tres" id="8_def"]
 [ext_resource type="Resource" path="res://data/characters/roy.tres" id="9_roy"]
@@ -15,61 +15,62 @@
 [ext_resource type="Resource" path="res://data/enemies/slug.tres" id="14_slug"]
 [ext_resource type="Resource" path="res://data/skills/move.tres" id="15_move"]
 
-[node name="BattleScene" type="Node2D"]
+[node name="BattleScene" type="Node2D" unique_id=381481906]
 script = ExtResource("1_scene")
 
-[node name="BattlefieldArena" parent="." instance=ExtResource("2_arena")]
+[node name="BattlefieldArena" parent="." unique_id=1839542220 instance=ExtResource("2_arena")]
 
-[node name="BattleCameraController" type="Node2D" parent="." node_paths=PackedStringArray("camera")]
+[node name="BattleCameraController" type="Node2D" parent="." unique_id=1489816830 node_paths=PackedStringArray("camera")]
 script = ExtResource("3_cam")
 camera = NodePath("Camera2D")
 
-[node name="Camera2D" type="Camera2D" parent="BattleCameraController"]
+[node name="Camera2D" type="Camera2D" parent="BattleCameraController" unique_id=1371024942]
 position = Vector2(576, 324)
 
-[node name="BattleManager" type="Node" parent="." node_paths=PackedStringArray("camera_controller")]
+[node name="BattleManager" type="Node" parent="." unique_id=1019681988 node_paths=PackedStringArray("camera_controller")]
 script = ExtResource("4_mgr")
 camera_controller = NodePath("../BattleCameraController")
 default_attack_skill = ExtResource("7_atk")
 default_defend_action = ExtResource("8_def")
 default_move_action = ExtResource("15_move")
 
-[node name="Combatants" type="Node2D" parent="."]
+[node name="Combatants" type="Node2D" parent="." unique_id=202736634]
+y_sort_enabled = true
+position = Vector2(0, 65)
+
+[node name="Players" type="Node2D" parent="Combatants" unique_id=1741951470]
 y_sort_enabled = true
 
-[node name="Players" type="Node2D" parent="Combatants"]
-y_sort_enabled = true
-
-[node name="Roy" parent="Combatants/Players" instance=ExtResource("5_char")]
+[node name="Roy" parent="Combatants/Players" unique_id=2130345218 instance=ExtResource("5_char")]
 position = Vector2(430, 326)
 character_definition = ExtResource("9_roy")
 
-[node name="Ingrid" parent="Combatants/Players" instance=ExtResource("5_char")]
+[node name="Ingrid" parent="Combatants/Players" unique_id=324490681 instance=ExtResource("5_char")]
 position = Vector2(472, 280)
 character_definition = ExtResource("10_ingrid")
 
-[node name="Jacob" parent="Combatants/Players" instance=ExtResource("5_char")]
+[node name="Jacob" parent="Combatants/Players" unique_id=1252777126 instance=ExtResource("5_char")]
 position = Vector2(150, 326)
 character_definition = ExtResource("11_jacob")
 
-[node name="Enemies" type="Node2D" parent="Combatants"]
+[node name="Enemies" type="Node2D" parent="Combatants" unique_id=864803115]
 y_sort_enabled = true
 
-[node name="Slime1" parent="Combatants/Enemies" instance=ExtResource("5_char")]
+[node name="Slime1" parent="Combatants/Enemies" unique_id=1352856550 instance=ExtResource("5_char")]
 position = Vector2(680, 280)
 character_definition = ExtResource("13_slime")
 display_name_override = "Slime 1"
 
-[node name="Slime2" parent="Combatants/Enemies" instance=ExtResource("5_char")]
+[node name="Slime2" parent="Combatants/Enemies" unique_id=840807884 instance=ExtResource("5_char")]
 position = Vector2(722, 326)
 character_definition = ExtResource("13_slime")
 display_name_override = "Slime 2"
 
-[node name="Slug1" parent="Combatants/Enemies" instance=ExtResource("5_char")]
+[node name="Slug1" parent="Combatants/Enemies" unique_id=1319854919 instance=ExtResource("5_char")]
 position = Vector2(820, 280)
 character_definition = ExtResource("14_slug")
 display_name_override = "Slug 1"
 
-[node name="BattleUI" parent="." node_paths=PackedStringArray("battle_manager", "camera") instance=ExtResource("6_ui")]
+[node name="BattleUI" parent="." unique_id=129187563 node_paths=PackedStringArray("battle_manager", "camera") instance=ExtResource("6_ui")]
 battle_manager = NodePath("../BattleManager")
 camera = NodePath("../BattleCameraController/Camera2D")

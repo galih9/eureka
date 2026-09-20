@@ -5,6 +5,9 @@ extends CanvasLayer
 
 @export var battle_manager: BattleManager
 @export var camera: Camera2D
+## The grid visual lives in the world scene (not in this CanvasLayer) so the
+## camera transform is applied correctly when zoomed in.
+@export var grid_visual: FormationGridVisual = null
 
 @onready var timeline_ui: TimelineUI = $TimelineLayer/TimelineUI
 @onready var status_ui: CharacterStatusUI = $CharacterStatusLayer/CharacterStatusUI
@@ -23,7 +26,6 @@ var selected_target_idx: int = 0
 var is_targeting: bool = false
 var is_moving: bool = false
 var pending_action_def: ActionDefinition = null
-var grid_visual: FormationGridVisual = null
 
 const DebugMenuUIScript = preload("res://scripts/ui/debug_menu_ui.gd")
 var debug_menu: Control = null
@@ -33,12 +35,8 @@ func _ready() -> void:
 	target_prompt_panel.visible = false
 	action_banner.visible = false
 	transition_panel.visible = false
-	
-	grid_visual = FormationGridVisual.new()
-	grid_visual.name = "FormationGridVisual"
-	add_child(grid_visual)
-	grid_visual.slot_clicked.connect(_on_grid_slot_clicked)
-	grid_visual.move_canceled.connect(_on_grid_move_canceled)
+	# Note: grid_visual signals are connected in battle_scene.gd after the node
+	# is created, because grid_visual is null here (assigned post-_ready).
 	
 	if restart_btn:
 		restart_btn.pressed.connect(_on_restart_pressed)
@@ -119,7 +117,7 @@ func connect_battle_manager(bm: BattleManager) -> void:
 	
 	if grid_visual != null and bm.formation_system != null:
 		grid_visual.formation_system = bm.formation_system
-		grid_visual.queue_redraw()
+		grid_visual.visible = false
 	if timeline_ui and bm.turn_timeline != null and not bm.all_combatants.is_empty():
 		timeline_ui.initialize(bm.turn_timeline)
 	if status_ui:
@@ -146,6 +144,10 @@ func _on_state_changed(new_state: BattleState.State) -> void:
 	match new_state:
 		BattleState.State.TIMELINE:
 			is_targeting = false
+			if is_moving:
+				is_moving = false
+				if grid_visual != null:
+					grid_visual.cancel_move_selection()
 			target_prompt_panel.visible = false
 			transition_panel.visible = false
 			enemy_info.hide_target_info()
@@ -154,12 +156,20 @@ func _on_state_changed(new_state: BattleState.State) -> void:
 			
 		BattleState.State.PLAYER_ACTION:
 			is_targeting = false
+			if is_moving:
+				is_moving = false
+				if grid_visual != null:
+					grid_visual.cancel_move_selection()
 			target_prompt_panel.visible = false
 			enemy_info.hide_target_info()
 			_clear_target_highlights()
 			
 		BattleState.State.ACTION_EXECUTION:
 			is_targeting = false
+			if is_moving:
+				is_moving = false
+				if grid_visual != null:
+					grid_visual.cancel_move_selection()
 			target_prompt_panel.visible = false
 			command_menu.hide_menu()
 			_clear_target_highlights()

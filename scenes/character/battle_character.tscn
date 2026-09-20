@@ -7,16 +7,16 @@
 script = ExtResource("1_char")
 
 [node name="CameraMarker" type="Marker2D" parent="."]
-position = Vector2(0, -32)
+position = Vector2(0, -35)
 
 [node name="TargetMarker" type="Marker2D" parent="."]
-position = Vector2(0, -64)
+position = Vector2(0, -75)
 
 [node name="AttackOrigin" type="Marker2D" parent="."]
-position = Vector2(28, -20)
+position = Vector2(28, -35)
 
 [node name="HitOrigin" type="Marker2D" parent="."]
-position = Vector2(0, -20)
+position = Vector2(0, -35)
 
 [node name="Visual" type="Node2D" parent="."]
 
@@ -25,6 +25,7 @@ color = Color(0.04, 0.06, 0.1, 0.45)
 polygon = PackedVector2Array(-20, 0, -14, -5, 0, -7, 14, -5, 20, 0, 14, 5, 0, 7, -14, 5)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visual"]
+position = Vector2(0, -38)
 scale = Vector2(2.4, 2.4)
 sprite_frames = ExtResource("2_frames")
 animation = &"idle"
@@ -33,7 +34,7 @@ animation = &"idle"
 
 [node name="TargetIndicator" type="Node2D" parent="Indicators"]
 visible = false
-position = Vector2(0, -62)
+position = Vector2(0, -75)
 
 [node name="Arrow" type="Polygon2D" parent="Indicators/TargetIndicator"]
 color = Color(1, 0.88, 0.2, 0.95)

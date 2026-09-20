@@ -1,24 +1,24 @@
-[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="CharacterDefinition" format=3 uid="uid://q4346bxusw0k"]
 
-[ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
+[ext_resource type="Script" uid="uid://duwcig2h3pupo" path="res://scripts/character/character_definition.gd" id="1_char"]
 [ext_resource type="Resource" path="res://data/skills/ingrid_basic_attack.tres" id="2_atk"]
 [ext_resource type="Resource" path="res://data/skills/ingrid_silence.tres" id="3_sil"]
 [ext_resource type="Resource" path="res://data/skills/ingrid_sleep.tres" id="4_slp"]
 [ext_resource type="Resource" path="res://data/perks/ingrid_transform.tres" id="5_trf"]
+[ext_resource type="Texture2D" uid="uid://d36uoybe3dg1g" path="res://assets/banner/female.png" id="6_bnr"]
 
 [resource]
 script = ExtResource("1_char")
 codename = "INGRID"
 display_name = "Ingrid"
-team = 0
 archetype = 2
+banner = ExtResource("6_bnr")
 max_hp = 480
-max_mp = 50
 attack = 44
 defense = 14
 agility = 24
 accuracy = 94
 evasion = 16
-skills = [ExtResource("2_atk"), ExtResource("3_sil"), ExtResource("4_slp")]
-perks = [ExtResource("5_trf")]
+skills = Array[Resource]([ExtResource("2_atk"), ExtResource("3_sil"), ExtResource("4_slp")])
+perks = Array[Resource]([ExtResource("5_trf")])
 accent_color = Color(1, 0.75, 0.2, 1)

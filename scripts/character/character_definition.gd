@@ -18,6 +18,7 @@ enum Archetype {
 @export var team: Team = Team.PLAYER
 @export var archetype: Archetype = Archetype.NONE
 @export var portrait: Texture2D
+@export var banner: Texture2D
 @export var model_scene: PackedScene
 
 # Base Stats
