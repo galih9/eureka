@@ -18,8 +18,8 @@ signal autonomous_action_triggered(character: BattleCharacter, reason: String)
 @export var default_attack_skill: ActionDefinition
 @export var default_defend_action: ActionDefinition
 @export var default_move_action: ActionDefinition
-@export var enemies_container: Node2D
-@export var players_container: Node2D
+@export var enemies_container: Node3D
+@export var players_container: Node3D
 
 var current_state: BattleState.State = BattleState.State.INTRO
 var all_combatants: Array = [] # Array[BattleCharacter]
@@ -477,7 +477,7 @@ func _on_action_line_reached(_actor: BattleCharacter) -> void:
 
 const MAX_ENEMIES: int = 12
 
-func spawn_enemy(enemy_def: CharacterDefinition, custom_pos: Vector2 = Vector2.ZERO) -> BattleCharacter:
+func spawn_enemy(enemy_def: CharacterDefinition, custom_pos: Vector3 = Vector3.ZERO) -> BattleCharacter:
 	if get_living_enemies().size() >= MAX_ENEMIES:
 		push_warning("Cannot spawn enemy: maximum living enemy count (%d) reached." % MAX_ENEMIES)
 		return null
@@ -493,15 +493,15 @@ func spawn_enemy(enemy_def: CharacterDefinition, custom_pos: Vector2 = Vector2.Z
 		
 	var target_pos = custom_pos
 	var target_slot = -1
-	if target_pos == Vector2.ZERO:
+	if target_pos == Vector3.ZERO:
 		if formation_system != null:
 			target_slot = formation_system.get_first_open_slot(1)
 			if target_slot >= 0:
 				target_pos = formation_system.get_slot_position(1, target_slot)
 				
-		if target_pos == Vector2.ZERO:
+		if target_pos == Vector3.ZERO:
 			var extra_idx = get_living_enemies().size()
-			target_pos = Vector2(980 + (extra_idx % 4) * 35, 300 + (extra_idx % 4) * 45)
+			target_pos = Vector3(5.5, 0.0, float(extra_idx % 4) * 1.5 - 2.25)
 			
 	var char_scene = preload("res://scenes/character/battle_character.tscn")
 	var new_enemy: BattleCharacter = char_scene.instantiate()

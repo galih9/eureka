@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
 [ext_resource type="Resource" path="res://data/skills/slime_basic_attack.tres" id="2_atk"]
 [ext_resource type="Resource" path="res://data/skills/slime_self_heal.tres" id="3_hel"]
 [ext_resource type="Resource" path="res://data/skills/slime_quick_attack.tres" id="4_qck"]
 [ext_resource type="Resource" path="res://data/skills/slime_silence.tres" id="5_sil"]
+[ext_resource type="SpriteFrames" path="res://data/enemies/slime_animation.tres" id="6_frames"]
 
 [resource]
 script = ExtResource("1_char")
@@ -12,6 +13,9 @@ codename = "SLIME"
 display_name = "Slime"
 team = 1
 archetype = 0
+sprite_frames = ExtResource("6_frames")
+sprite_pixel_size = 0.025
+sprite_offset_y = 0.28
 max_hp = 280
 max_mp = 40
 attack = 28

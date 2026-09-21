@@ -17,3 +17,4 @@ accuracy = 98
 critical_chance = 0.12
 is_heal = false
 status_chance = 1.0
+vfx_animation = "slash_small"

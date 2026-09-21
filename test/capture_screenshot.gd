@@ -10,9 +10,9 @@ func _init() -> void:
 
 func _process(_delta: float) -> bool:
 	frames += 1
-	if frames == 10:
+	if frames == 15:
 		var image = root.get_texture().get_image()
-		var out_path = "C:/Users/A8/.gemini/antigravity/brain/a4db6551-ade4-465d-ac02-143c12074137/party_hud_verified.png"
+		var out_path = "C:/Users/A8/.gemini/antigravity/brain/58199fe4-99e3-4615-be80-9dd3bfb0df48/semi_3d_battlefield.png"
 		var err = image.save_png(out_path)
 		if err == OK:
 			print("Screenshot successfully saved to: ", out_path)

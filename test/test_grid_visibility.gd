@@ -1,13 +1,21 @@
 extends SceneTree
 
+var frame: int = 0
+var scene: BattleScene = null
+
 func _init() -> void:
 	print("--- Testing FormationGridVisual Visibility & Lifecycle ---")
 	var scene_res = load("res://scenes/battle_scene.tscn") as PackedScene
 	assert(scene_res != null, "Failed to load battle_scene.tscn")
 	
-	var scene: BattleScene = scene_res.instantiate() as BattleScene
+	scene = scene_res.instantiate() as BattleScene
 	root.add_child(scene)
-	
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if frame < 2:
+		return false
+		
 	var grid_visual: FormationGridVisual = scene.get_node_or_null("FormationGridVisual") as FormationGridVisual
 	assert(grid_visual != null, "FormationGridVisual node must exist in BattleScene")
 	
@@ -48,3 +56,4 @@ func _init() -> void:
 	
 	print("--- ALL FORMATION GRID VISUAL TESTS PASSED! ---")
 	quit(0)
+	return true

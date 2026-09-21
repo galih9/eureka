@@ -1,7 +1,8 @@
 class_name BattleCharacter
-extends Node2D
+extends Node3D
 
-## Runtime 2D side-scroller combatant holding live battle stats, status instances, and perks.
+## Runtime Semi-3D combatant holding live battle stats, status instances, and perks.
+## Displays an AnimatedSprite3D with billboard mode on a 3D arena.
 
 signal hp_changed(current: int, maximum: int)
 signal mp_changed(current: int, maximum: int)
@@ -59,23 +60,23 @@ var active_modifiers: Array[StatModifier] = []
 var active_statuses: Array = [] # Array[StatusInstance]
 var active_perks: Array = []    # Array[PerkInstance]
 
-# 2D Node References
-@onready var visual_container: Node2D = $Visual
-@onready var animated_sprite: AnimatedSprite2D = $Visual/AnimatedSprite2D
-@onready var shadow: Node2D = $Visual/Shadow
-@onready var target_indicator: Node2D = $Indicators/TargetIndicator
-@onready var selection_indicator: Node2D = $Indicators/SelectionIndicator
+# 3D Node References
+@onready var visual_container: Node3D = $Visual
+@onready var animated_sprite: AnimatedSprite3D = $Visual/AnimatedSprite3D
+@onready var shadow: Node3D = $Visual/Shadow
+@onready var target_indicator: Node3D = $Indicators/TargetIndicator
+@onready var selection_indicator: Node3D = $Indicators/SelectionIndicator
 
-@onready var camera_marker: Marker2D = $CameraMarker
-@onready var target_marker: Marker2D = $TargetMarker
-@onready var attack_origin: Marker2D = $AttackOrigin
-@onready var hit_origin: Marker2D = $HitOrigin
+@onready var camera_marker: Marker3D = $CameraMarker
+@onready var target_marker: Marker3D = $TargetMarker
+@onready var attack_origin: Marker3D = $AttackOrigin
+@onready var hit_origin: Marker3D = $HitOrigin
 
-var initial_position: Vector2 = Vector2.ZERO
+var initial_position: Vector3 = Vector3.ZERO
 var base_modulate: Color = Color.WHITE
 var target_indicator_tween: Tween = null
 
-# Overhead Visuals
+# Overhead Visuals (projected into screen space)
 var overhead_container: Node2D = null
 var overhead_hp_bar: ProgressBar = null
 var overhead_hp_bg: Panel = null
@@ -96,14 +97,47 @@ func _ready() -> void:
 	if character_definition != null:
 		initialize(character_definition)
 
+func _process(_delta: float) -> void:
+	_update_overhead_position()
+
+func _update_overhead_position() -> void:
+	if overhead_container == null:
+		return
+	if is_dead:
+		overhead_container.visible = false
+		return
+	var cam = get_viewport().get_camera_3d() if is_inside_tree() else null
+	if cam != null and is_instance_valid(cam):
+		var head_world_pos = global_position + Vector3(0.0, 1.15, 0.0)
+		if not cam.is_position_behind(head_world_pos):
+			overhead_container.position = cam.unproject_position(head_world_pos)
+			var show_bar = (team == 1) or not active_statuses.is_empty()
+			overhead_container.visible = show_bar
+		else:
+			overhead_container.visible = false
+	else:
+		overhead_container.visible = (team == 1)
+
+func _exit_tree() -> void:
+	if overhead_container != null and is_instance_valid(overhead_container):
+		if overhead_container.get_parent() != self:
+			overhead_container.queue_free()
+
 func _setup_overhead_ui() -> void:
 	if overhead_container != null:
 		return
 		
 	overhead_container = Node2D.new()
-	overhead_container.name = "OverheadUI"
-	overhead_container.position = Vector2(0, -82)
-	add_child(overhead_container)
+	overhead_container.name = "OverheadUI_%s" % name
+	
+	if is_inside_tree():
+		var ui_node = get_tree().root.find_child("BattleUI", true, false)
+		if ui_node != null:
+			ui_node.add_child(overhead_container)
+		else:
+			add_child(overhead_container)
+	else:
+		add_child(overhead_container)
 	
 	# Mini Overhead HP bar (displayed for enemies by default)
 	overhead_hp_bg = Panel.new()
@@ -153,7 +187,6 @@ func _setup_overhead_ui() -> void:
 	overhead_status_box.custom_minimum_size = Vector2(150, 16)
 	overhead_container.add_child(overhead_status_box)
 	
-	# Only enemies show overhead HP bar by default; players have the bottom party display
 	var show_bar = (team == 1)
 	overhead_hp_bg.visible = show_bar
 	overhead_hp_bar.visible = show_bar
@@ -272,17 +305,29 @@ func initialize(def: CharacterDefinition) -> void:
 
 func _setup_visuals() -> void:
 	if animated_sprite == null:
+		animated_sprite = get_node_or_null("Visual/AnimatedSprite3D")
+	if animated_sprite == null:
 		return
 		
-	# Side-scroller perspective facing:
-	# Player team (0) faces right, Enemy team (1) faces left
+	# Apply custom SpriteFrames and sizing if provided by CharacterDefinition
+	if character_definition != null and character_definition.sprite_frames != null:
+		animated_sprite.sprite_frames = character_definition.sprite_frames
+		animated_sprite.pixel_size = character_definition.sprite_pixel_size
+		animated_sprite.position.y = 0.395 + character_definition.sprite_offset_y
+	else:
+		animated_sprite.position.y = 0.395
+		
+	# Side perspective facing:
+	# Player team (0) faces right (+X), Enemy team (1) faces left (-X)
 	if team == 0:
 		animated_sprite.flip_h = false
 		base_modulate = Color(1.0, 1.0, 1.0, 1.0)
 	else:
 		animated_sprite.flip_h = true
-		# Give enemies a distinct cyber/hostile tint based on their definition accent
-		if character_definition != null and character_definition.accent_color != Color.TRANSPARENT:
+		if character_definition != null and character_definition.sprite_frames != null:
+			# Custom animated monsters retain their natural palette
+			base_modulate = Color.WHITE
+		elif character_definition != null and character_definition.accent_color != Color.TRANSPARENT:
 			base_modulate = character_definition.accent_color.lerp(Color(1.0, 0.45, 0.45), 0.5)
 		else:
 			base_modulate = Color(1.0, 0.55, 0.55, 1.0)
@@ -308,13 +353,13 @@ func set_target_selected(selected: bool) -> void:
 	if selected:
 		if target_indicator_tween != null and target_indicator_tween.is_valid():
 			target_indicator_tween.kill()
-		target_indicator.position.y = -62.0
+		target_indicator.position.y = 1.25
 		if is_inside_tree():
 			target_indicator_tween = create_tween()
 			if target_indicator_tween != null:
 				target_indicator_tween.set_loops()
-				target_indicator_tween.tween_property(target_indicator, "position:y", -54.0, 0.3).set_trans(Tween.TRANS_SINE)
-				target_indicator_tween.tween_property(target_indicator, "position:y", -62.0, 0.3).set_trans(Tween.TRANS_SINE)
+				target_indicator_tween.tween_property(target_indicator, "position:y", 1.48, 0.3).set_trans(Tween.TRANS_SINE)
+				target_indicator_tween.tween_property(target_indicator, "position:y", 1.25, 0.3).set_trans(Tween.TRANS_SINE)
 	else:
 		if target_indicator_tween != null and target_indicator_tween.is_valid():
 			target_indicator_tween.kill()
@@ -326,10 +371,10 @@ func set_highlight(active: bool) -> void:
 			var tw = create_tween()
 			if tw != null:
 				tw.set_loops()
-				tw.tween_property(selection_indicator, "scale", Vector2(1.15, 1.15), 0.35)
-				tw.tween_property(selection_indicator, "scale", Vector2(1.0, 1.0), 0.35)
+				tw.tween_property(selection_indicator, "scale", Vector3(1.18, 1.0, 1.18), 0.35)
+				tw.tween_property(selection_indicator, "scale", Vector3(1.0, 1.0, 1.0), 0.35)
 		else:
-			selection_indicator.scale = Vector2.ONE
+			selection_indicator.scale = Vector3.ONE
 
 # --- Stat Management ---
 
@@ -395,7 +440,6 @@ func heal(amount: int) -> int:
 	hp_changed.emit(current_hp, max_h)
 	refresh_overhead_hp()
 	
-	# Gentle green heal flash
 	if animated_sprite != null and is_inside_tree():
 		var tw = create_tween()
 		if tw != null:
@@ -429,7 +473,7 @@ func die() -> void:
 	died.emit(self)
 	play_death_anim()
 
-# --- 2D Side-scroller Animation Control ---
+# --- Semi-3D Animation Control ---
 
 func play_idle() -> void:
 	if animated_sprite == null or is_dead:
@@ -442,14 +486,16 @@ func play_move() -> void:
 	if animated_sprite == null or is_dead:
 		return
 	animated_sprite.offset = Vector2.ZERO
-	if animated_sprite.sprite_frames.has_animation(&"move"):
+	if animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(&"move"):
 		animated_sprite.play(&"move")
+	else:
+		play_idle()
 
 func play_attack() -> void:
 	if animated_sprite == null or is_dead:
 		return
 	animated_sprite.offset = Vector2.ZERO
-	if animated_sprite.sprite_frames.has_animation(&"attack"):
+	if animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(&"attack"):
 		animated_sprite.play(&"attack")
 
 func play_death_anim() -> void:
@@ -463,14 +509,16 @@ func play_death_anim() -> void:
 			animated_sprite.play(&"death")
 		elif animated_sprite.sprite_frames.has_animation(&"death_static"):
 			animated_sprite.play(&"death_static")
+		elif animated_sprite.sprite_frames.has_animation(&"hurt"):
+			animated_sprite.play(&"hurt")
 		
 	if is_inside_tree():
 		var tw = create_tween()
 		if tw != null:
 			tw.tween_property(animated_sprite, "modulate:a", 0.6, 0.6)
 
-## 2D Side-scroller attack sequence: lunge forward, strike, retreat back
-func play_attack_anim(target_pos: Vector2, on_hit_frame: Callable, on_complete: Callable, is_melee: bool = true) -> void:
+## 3D Arena attack sequence: lunge forward across the 3D ground plane, strike, retreat back
+func play_attack_anim(target_pos: Vector3, on_hit_frame: Callable, on_complete: Callable, is_melee: bool = true) -> void:
 	if is_dead:
 		if on_complete.is_valid():
 			on_complete.call()
@@ -479,9 +527,9 @@ func play_attack_anim(target_pos: Vector2, on_hit_frame: Callable, on_complete: 
 	var tween = create_tween()
 	
 	if is_melee:
-		# Determine strike position directly in front of target in 2D space (matching both target X offset and target Y)
-		var strike_offset_x = -72.0 if team == 0 else 72.0
-		var strike_pos = Vector2(target_pos.x + strike_offset_x, target_pos.y)
+		# Determine strike position directly in front of target in 3D arena space
+		var strike_offset_x = -1.4 if team == 0 else 1.4
+		var strike_pos = Vector3(target_pos.x + strike_offset_x, 0.0, target_pos.z)
 		
 		# 1. Dash toward target playing 'move' animation
 		play_move()
@@ -511,9 +559,9 @@ func play_attack_anim(target_pos: Vector2, on_hit_frame: Callable, on_complete: 
 				on_complete.call()
 		)
 	else:
-		# Ranged attack / skill: step forward slightly, cast/strike from distance, step back
+		# Ranged attack / skill: step forward slightly along X, strike from distance, step back
 		var step_dir = 1.0 if team == 0 else -1.0
-		var step_pos = initial_position + Vector2(step_dir * 28.0, 0.0)
+		var step_pos = initial_position + Vector3(step_dir * 0.7, 0.0, 0.0)
 		
 		play_move()
 		tween.tween_property(self, "global_position", step_pos, 0.14)
@@ -534,19 +582,17 @@ func play_attack_anim(target_pos: Vector2, on_hit_frame: Callable, on_complete: 
 				on_complete.call()
 		)
 
-## Item usage animation: user requested to use attack animation for now
-func play_item_anim(target_pos: Vector2, on_use_frame: Callable, on_complete: Callable) -> void:
+## Item usage animation in 3D
+func play_item_anim(target_pos: Vector3, on_use_frame: Callable, on_complete: Callable) -> void:
 	if is_dead:
 		if on_complete.is_valid():
 			on_complete.call()
 		return
 		
 	var step_dir = 1.0 if team == 0 else -1.0
-	var step_pos = initial_position + Vector2(step_dir * 28.0, 0.0)
+	var step_pos = initial_position + Vector3(step_dir * 0.7, 0.0, 0.0)
 	
 	var tween = create_tween()
-	
-	# Small step forward and play attack animation
 	play_move()
 	tween.tween_property(self, "global_position", step_pos, 0.14)
 	tween.tween_callback(func():
@@ -559,7 +605,6 @@ func play_item_anim(target_pos: Vector2, on_use_frame: Callable, on_complete: Ca
 	)
 	tween.tween_interval(0.45)
 	
-	# Step back and return to idle
 	tween.tween_property(self, "global_position", initial_position, 0.18)
 	tween.tween_callback(func():
 		play_idle()
@@ -571,24 +616,32 @@ func play_hit_anim(is_crit: bool = false) -> void:
 	if animated_sprite == null or is_dead:
 		return
 		
-	# Side-scroller horizontal knockback recoil
 	var recoil_dir = -1.0 if team == 0 else 1.0
-	var recoil_dist = 36.0 if is_crit else 20.0
-	var recoil_pos = initial_position + Vector2(recoil_dir * recoil_dist, 0.0)
+	var recoil_dist = 0.65 if is_crit else 0.35
+	var recoil_pos = initial_position + Vector3(recoil_dir * recoil_dist, 0.0, 0.0)
 	
-	# Red hit flash
 	animated_sprite.modulate = Color(2.5, 0.3, 0.3, 1.0) if is_crit else Color(2.0, 1.8, 1.8, 1.0)
 	
-	var tw = create_tween()
-	tw.tween_property(self, "global_position", recoil_pos, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(animated_sprite, "modulate", base_modulate, 0.15)
-	tw.tween_property(self, "global_position", initial_position, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	if animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(&"hurt"):
+		animated_sprite.play(&"hurt")
+	
+	if is_inside_tree():
+		var tw = create_tween()
+		if tw != null:
+			tw.tween_property(self, "global_position", recoil_pos, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw.tween_property(animated_sprite, "modulate", base_modulate, 0.15)
+			tw.tween_property(self, "global_position", initial_position, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+			tw.tween_callback(func():
+				if not is_dead and animated_sprite != null and animated_sprite.sprite_frames != null:
+					if animated_sprite.animation == &"hurt":
+						play_idle()
+			)
 
 func play_dodge_anim() -> void:
-	if is_dead:
+	if is_dead or not is_inside_tree():
 		return
 	var dodge_dir = -1.0 if team == 0 else 1.0
-	var dodge_pos = initial_position + Vector2(dodge_dir * 32.0, -18.0)
+	var dodge_pos = initial_position + Vector3(dodge_dir * 0.65, 0.0, -0.45)
 	
 	var tw = create_tween()
 	tw.tween_property(self, "global_position", dodge_pos, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

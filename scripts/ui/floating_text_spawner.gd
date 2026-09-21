@@ -1,9 +1,9 @@
 class_name FloatingTextSpawner
 extends Control
 
-## Spawns stylized 2D damage numbers, critical notices, and miss indicators.
+## Spawns stylized damage numbers, critical notices, and miss indicators projected from 3D world space.
 
-@export var camera: Camera2D
+@export var camera: Camera3D
 
 func _ready() -> void:
 	var events = get_node_or_null("/root/CombatEvents")
@@ -32,8 +32,7 @@ func _on_action_canceled(target: Node, _disruptor: Node, _result: RefCounted) ->
 		return
 	var cancel_label = FloatingText.new()
 	add_child(cancel_label)
-	cancel_label.setup("CANCEL!", target.global_position + Vector2(0, -32.0), camera, Color(1.0, 0.35, 0.15), true, false)
-
+	cancel_label.setup("CANCEL!", target.global_position + Vector3(0, 1.2, 0), camera, Color(1.0, 0.35, 0.15), true, false)
 
 func _on_attack_missed(result: AttackResult) -> void:
 	if result == null or result.target == null:

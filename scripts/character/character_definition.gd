@@ -20,6 +20,9 @@ enum Archetype {
 @export var portrait: Texture2D
 @export var banner: Texture2D
 @export var model_scene: PackedScene
+@export var sprite_frames: SpriteFrames
+@export var sprite_pixel_size: float = 0.025
+@export var sprite_offset_y: float = 0.0
 
 # Base Stats
 @export var max_hp: int = 500

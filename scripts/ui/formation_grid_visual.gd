@@ -1,15 +1,13 @@
 class_name FormationGridVisual
-extends Node2D
+extends Node3D
 
-## Renders stylish horizontal perspective floor cells and manages interactive tile selection for Move command.
-## Must live in the world (Node2D) scene so the camera transform is applied correctly.
-## The grid is hidden by default and only shown when a Move action is active to select a destination cell.
+## Semi-3D Tactical Formation Grid Visualizer for Move command slot selection.
+## Renders stylish glowing 3D floor tiles and a hovering indicator over valid destination cells.
 
 signal slot_clicked(slot_index: int)
 signal move_canceled()
 
-## Reference to the Camera2D so mouse clicks can be converted from screen→world space.
-var camera: Camera2D = null
+@export var camera: Camera3D = null
 
 var formation_system: FormationSystem = null
 var is_move_targeting: bool = false
@@ -17,20 +15,41 @@ var valid_slot_indices: Array[int] = []
 var selected_valid_idx: int = 0
 var hovered_slot: int = -1
 
-# Floor cell dimensions (horizontal perspective ellipse)
-const RX: float = 34.0
-const RY: float = 12.0
-
 var pulse_time: float = 0.0
+var tile_nodes: Dictionary = {} # slot_index -> MeshInstance3D
+var cursor_arrow: MeshInstance3D = null
 
 func _ready() -> void:
-	z_index = 0 # Rendered in world space alongside characters
-	visible = false # Hidden by default; only displayed during Move command selection
+	visible = false
+	_create_cursor_arrow()
+
+func _create_cursor_arrow() -> void:
+	if cursor_arrow != null:
+		return
+	cursor_arrow = MeshInstance3D.new()
+	cursor_arrow.name = "MoveCursorArrow"
+	
+	var cone = CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 0.22
+	cone.height = 0.45
+	
+	var mat = StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(1.0, 0.88, 0.2, 0.95)
+	cone.material = mat
+	
+	cursor_arrow.mesh = cone
+	cursor_arrow.rotation_degrees = Vector3(180, 0, 0) # Point downward
+	cursor_arrow.visible = false
+	add_child(cursor_arrow)
 
 func _process(delta: float) -> void:
-	if is_move_targeting and visible:
-		pulse_time += delta * 4.0
-		queue_redraw()
+	if not is_move_targeting or not visible:
+		return
+		
+	pulse_time += delta * 4.0
+	_update_tile_visuals()
 
 func start_move_selection(formation: FormationSystem, valid_slots: Array) -> void:
 	formation_system = formation
@@ -41,18 +60,88 @@ func start_move_selection(formation: FormationSystem, valid_slots: Array) -> voi
 	is_move_targeting = true
 	visible = true
 	pulse_time = 0.0
-	queue_redraw()
+	
+	_rebuild_tiles()
+	_update_tile_visuals()
 
 func cancel_move_selection() -> void:
 	is_move_targeting = false
 	valid_slot_indices.clear()
 	visible = false
-	queue_redraw()
+	_clear_tiles()
+	if cursor_arrow != null:
+		cursor_arrow.visible = false
 
 func get_current_selected_slot() -> int:
 	if valid_slot_indices.is_empty():
 		return -1
 	return valid_slot_indices[selected_valid_idx]
+
+func _clear_tiles() -> void:
+	for slot_idx in tile_nodes.keys():
+		var node = tile_nodes[slot_idx]
+		if is_instance_valid(node):
+			node.queue_free()
+	tile_nodes.clear()
+
+func _rebuild_tiles() -> void:
+	_clear_tiles()
+	if formation_system == null:
+		return
+		
+	for slot_idx in valid_slot_indices:
+		var slot_pos = formation_system.get_slot_position(0, slot_idx)
+		
+		var tile = MeshInstance3D.new()
+		tile.name = "SlotTile_%d" % slot_idx
+		
+		var torus = TorusMesh.new()
+		torus.inner_radius = 0.52
+		torus.outer_radius = 0.65
+		torus.rings = 32
+		torus.ring_segments = 4
+		
+		var mat = StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.albedo_color = Color(0.2, 0.85, 0.65, 0.7)
+		torus.material = mat
+		
+		tile.mesh = torus
+		tile.position = slot_pos + Vector3(0.0, 0.02, 0.0)
+		add_child(tile)
+		tile_nodes[slot_idx] = tile
+
+func _update_tile_visuals() -> void:
+	if valid_slot_indices.is_empty():
+		return
+		
+	var active_slot = valid_slot_indices[selected_valid_idx]
+	var alpha_pulse = 0.75 + 0.25 * sin(pulse_time * 2.5)
+	
+	for slot_idx in tile_nodes.keys():
+		var tile = tile_nodes[slot_idx] as MeshInstance3D
+		if tile == null or not is_instance_valid(tile):
+			continue
+			
+		var mat = tile.mesh.material as StandardMaterial3D
+		if slot_idx == active_slot:
+			# Focused slot: bright pulsing gold
+			if mat != null:
+				mat.albedo_color = Color(1.0, 0.88, 0.2, 0.95 * alpha_pulse)
+			tile.scale = Vector3(1.15, 1.0, 1.15)
+		else:
+			# Available slot: subtle emerald/cyan
+			if mat != null:
+				mat.albedo_color = Color(0.2, 0.85, 0.65, 0.55)
+			tile.scale = Vector3.ONE
+			
+	# Update arrow cursor
+	if cursor_arrow != null and formation_system != null:
+		var slot_pos = formation_system.get_slot_position(0, active_slot)
+		var bounce = sin(pulse_time * 3.0) * 0.10
+		cursor_arrow.position = slot_pos + Vector3(0.0, 0.8 + bounce, 0.0)
+		cursor_arrow.visible = true
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_move_targeting or not visible or valid_slot_indices.is_empty():
@@ -61,11 +150,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Keyboard / Gamepad Navigation
 	if event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down") or (event is InputEventKey and event.pressed and event.keycode == KEY_D):
 		selected_valid_idx = (selected_valid_idx + 1) % valid_slot_indices.size()
-		queue_redraw()
+		_update_tile_visuals()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up") or (event is InputEventKey and event.pressed and event.keycode == KEY_A):
 		selected_valid_idx = (selected_valid_idx - 1 + valid_slot_indices.size()) % valid_slot_indices.size()
-		queue_redraw()
+		_update_tile_visuals()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_accept") or (event is InputEventKey and event.pressed and (event.keycode == KEY_SPACE or event.keycode == KEY_ENTER)):
 		slot_clicked.emit(valid_slot_indices[selected_valid_idx])
@@ -75,88 +164,40 @@ func _unhandled_input(event: InputEvent) -> void:
 		move_canceled.emit()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion:
-		var world_pos = _get_world_mouse_position(event.position)
-		var slot = _find_slot_at_world_pos(world_pos)
-		if slot in valid_slot_indices:
-			var idx = valid_slot_indices.find(slot)
+		var hovered = _find_slot_at_screen_pos(event.position)
+		if hovered in valid_slot_indices:
+			var idx = valid_slot_indices.find(hovered)
 			if idx != -1 and idx != selected_valid_idx:
 				selected_valid_idx = idx
-				queue_redraw()
+				_update_tile_visuals()
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var world_pos = _get_world_mouse_position(event.position)
-		var clicked_slot = _find_slot_at_world_pos(world_pos)
+		var clicked_slot = _find_slot_at_screen_pos(event.position)
 		if clicked_slot in valid_slot_indices:
 			slot_clicked.emit(clicked_slot)
 			get_viewport().set_input_as_handled()
 
-func _get_world_mouse_position(screen_pos: Vector2) -> Vector2:
-	if is_inside_tree():
-		return get_global_mouse_position()
-	if camera != null:
-		return camera.get_screen_center_position() \
-			+ (screen_pos - get_viewport().get_visible_rect().size * 0.5) / camera.zoom
-	return screen_pos
-
-func _find_slot_at_world_pos(world_pos: Vector2) -> int:
+func _find_slot_at_screen_pos(screen_pos: Vector2) -> int:
 	if formation_system == null:
 		return -1
-	for idx in valid_slot_indices:
-		var slot_pos = formation_system.get_slot_position(0, idx)
-		var dx = world_pos.x - slot_pos.x
-		var dy = world_pos.y - slot_pos.y
-		# Ellipse metric: (dx/RX)^2 + (dy/RY)^2 <= 1.4
-		if (dx * dx) / (RX * RX) + (dy * dy) / (RY * RY) <= 1.4:
-			return idx
-	return -1
-
-func _draw() -> void:
-	# ONLY draw when actively selecting a move destination!
-	if not is_move_targeting or not visible or formation_system == null:
-		return
 		
-	# Draw only the valid destination slots for the moving character
-	for i in range(valid_slot_indices.size()):
-		var slot_idx = valid_slot_indices[i]
-		var pos = formation_system.get_slot_position(0, slot_idx)
-		var is_focused = (i == selected_valid_idx)
-		_draw_tile(pos, slot_idx, is_focused)
-
-func _get_ellipse_points(center: Vector2, rx: float, ry: float, segments: int = 24) -> PackedVector2Array:
-	var pts = PackedVector2Array()
-	for i in range(segments):
-		var angle = float(i) / float(segments) * TAU
-		pts.append(center + Vector2(cos(angle) * rx, sin(angle) * ry))
-	return pts
-
-func _draw_tile(pos: Vector2, slot_idx: int, is_focused: bool) -> void:
-	var pts = _get_ellipse_points(pos, RX, RY, 24)
+	var active_cam = camera
+	if active_cam == null and is_inside_tree():
+		active_cam = get_viewport().get_camera_3d()
+		
+	if active_cam == null:
+		return -1
+		
+	var closest_slot = -1
+	var min_dist = 60.0 # Screen click radius threshold
 	
-	if is_focused:
-		# Bright pulsing gold cursor with floating indicator arrow
-		var alpha = 0.8 + 0.2 * sin(pulse_time * 2.0)
-		draw_colored_polygon(pts, Color(1.0, 0.85, 0.2, 0.42 * alpha))
-		draw_polyline(pts + PackedVector2Array([pts[0]]), Color(1.0, 0.95, 0.4, alpha), 2.5)
-		
-		# Inner tactical accent ring
-		var inner_pts = _get_ellipse_points(pos, RX * 0.65, RY * 0.65, 20)
-		draw_polyline(inner_pts + PackedVector2Array([inner_pts[0]]), Color(1.0, 1.0, 0.6, 0.7 * alpha), 1.5)
-		
-		# Downward pointing arrow indicator hovering above the cell
-		var bounce = sin(pulse_time * 3.0) * 3.0
-		var arrow_tip = pos + Vector2(0, -RY - 10 + bounce)
-		var arrow_pts = PackedVector2Array([
-			arrow_tip,
-			arrow_tip + Vector2(-6, -10),
-			arrow_tip + Vector2(6, -10)
-		])
-		draw_colored_polygon(arrow_pts, Color(1.0, 0.9, 0.2, 0.95))
-		draw_polyline(arrow_pts + PackedVector2Array([arrow_pts[0]]), Color(1.0, 1.0, 0.6, 1.0), 1.5)
-	else:
-		# Glowing cyan/emerald destination cell (perspective floor disc)
-		var alpha = 0.45 + 0.2 * sin(pulse_time + float(slot_idx) * 0.4)
-		draw_colored_polygon(pts, Color(0.15, 0.85, 0.65, 0.28 * alpha))
-		draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0.25, 1.0, 0.75, 0.8 * alpha), 2.0)
-		
-		# Subtle inner accent
-		var inner_pts = _get_ellipse_points(pos, RX * 0.55, RY * 0.55, 16)
-		draw_polyline(inner_pts + PackedVector2Array([inner_pts[0]]), Color(0.35, 1.0, 0.8, 0.35 * alpha), 1.0)
+	for slot_idx in valid_slot_indices:
+		var slot_pos_3d = formation_system.get_slot_position(0, slot_idx)
+		if active_cam.is_position_behind(slot_pos_3d):
+			continue
+		var unprojected = active_cam.unproject_position(slot_pos_3d)
+		var dist = screen_pos.distance_to(unprojected)
+		if dist < min_dist:
+			min_dist = dist
+			closest_slot = slot_idx
+			
+	return closest_slot

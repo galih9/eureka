@@ -1,0 +1,36 @@
+[gd_scene load_steps=8 format=3 uid="uid://c5q3xly7rain0"]
+
+[ext_resource type="Script" uid="uid://di4dqjmtcqwm7" path="res://scripts/effects/rain_effect.gd" id="1_rain_script"]
+[ext_resource type="Material" uid="uid://bwm4r58g1278q" path="res://assets/effects/rain/rain_process_material.tres" id="2_proc_mat"]
+[ext_resource type="RibbonTrailMesh" uid="uid://dg0u81y7laye1" path="res://assets/effects/rain/rain_trail_mesh.tres" id="3_mesh"]
+[ext_resource type="Material" uid="uid://csplashproc001" path="res://assets/effects/rain/splash_process_material.tres" id="4_spl_proc"]
+[ext_resource type="Material" uid="uid://dpsplshmat001" path="res://assets/effects/rain/splash_material.tres" id="5_spl_mat"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_splash"]
+material = ExtResource("5_spl_mat")
+size = Vector2(0.12, 0.12)
+
+[node name="RainEffect" type="Node3D"]
+script = ExtResource("1_rain_script")
+
+[node name="RainParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 0)
+amount = 500
+sub_emitter = NodePath("../SplashParticles")
+lifetime = 1.2
+preprocess = 1.2
+randomness = 0.5
+visibility_aabb = AABB(-25, -20, -25, 50, 25, 50)
+trail_enabled = true
+trail_lifetime = 0.08
+process_material = ExtResource("2_proc_mat")
+draw_pass_1 = ExtResource("3_mesh")
+
+[node name="SplashParticles" type="GPUParticles3D" parent="."]
+amount = 750
+lifetime = 0.15
+explosiveness = 0.8
+randomness = 0.4
+visibility_aabb = AABB(-25, -2, -25, 50, 5, 50)
+process_material = ExtResource("4_spl_proc")
+draw_pass_1 = SubResource("QuadMesh_splash")

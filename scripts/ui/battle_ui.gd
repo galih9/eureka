@@ -4,7 +4,7 @@ extends CanvasLayer
 ## Root Battle UI manager connecting state transitions, menus, targeting, and HUD layers.
 
 @export var battle_manager: BattleManager
-@export var camera: Camera2D
+@export var camera: Camera3D
 ## The grid visual lives in the world scene (not in this CanvasLayer) so the
 ## camera transform is applied correctly when zoomed in.
 @export var grid_visual: FormationGridVisual = null

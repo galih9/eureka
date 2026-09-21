@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/character/character_definition.gd" id="1_char"]
 [ext_resource type="Resource" path="res://data/skills/slime_basic_attack.tres" id="2_atk"]
 [ext_resource type="Resource" path="res://data/skills/tutorial_heavy_slam.tres" id="3_slm"]
 [ext_resource type="Resource" path="res://data/skills/tutorial_acid_dart.tres" id="4_drt"]
+[ext_resource type="SpriteFrames" path="res://data/enemies/slime_animation.tres" id="5_frames"]
 
 [resource]
 script = ExtResource("1_char")
@@ -11,6 +12,9 @@ codename = "TRAINING_SLIME"
 display_name = "Training Slime"
 team = 1
 archetype = 0
+sprite_frames = ExtResource("5_frames")
+sprite_pixel_size = 0.025
+sprite_offset_y = 0.28
 max_hp = 2000
 max_mp = 100
 attack = 12

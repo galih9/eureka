@@ -13,47 +13,46 @@
 [ext_resource type="Resource" path="res://data/characters/tutorial_roy.tres" id="11_roy"]
 [ext_resource type="Resource" path="res://data/enemies/tutorial_slime.tres" id="12_slime"]
 
-[node name="TutorialBattleScene" type="Node2D"]
+[node name="TutorialBattleScene" type="Node3D"]
 script = ExtResource("1_scene")
 
 [node name="BattlefieldArena" parent="." instance=ExtResource("2_arena")]
 
-[node name="BattleCameraController" type="Node2D" parent="." node_paths=PackedStringArray("camera")]
+[node name="BattleCameraController" type="Node3D" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("3_cam")
-camera = NodePath("Camera2D")
+camera = NodePath("Camera3D")
 
-[node name="Camera2D" type="Camera2D" parent="BattleCameraController"]
-position = Vector2(576, 324)
+[node name="Camera3D" type="Camera3D" parent="BattleCameraController"]
+transform = Transform3D(1, 0, 0, 0, 0.930418, 0.366501, 0, -0.366501, 0.930418, 0, 5, 12.2)
+fov = 40.0
 
-[node name="TutorialManager" type="Node" parent="." node_paths=PackedStringArray("camera_controller", "tutorial_ui")]
+[node name="TutorialManager" type="Node" parent="." node_paths=PackedStringArray("camera_controller", "tutorial_ui", "enemies_container", "players_container")]
 script = ExtResource("4_mgr")
 camera_controller = NodePath("../BattleCameraController")
 default_attack_skill = ExtResource("8_atk")
 default_defend_action = ExtResource("9_def")
 default_move_action = ExtResource("10_move")
 tutorial_ui = NodePath("../TutorialUI")
+enemies_container = NodePath("../Combatants/Enemies")
+players_container = NodePath("../Combatants/Players")
 
-[node name="Combatants" type="Node2D" parent="."]
-y_sort_enabled = true
-position = Vector2(0, 65)
+[node name="Combatants" type="Node3D" parent="."]
 
-[node name="Players" type="Node2D" parent="Combatants"]
-y_sort_enabled = true
+[node name="Players" type="Node3D" parent="Combatants"]
 
 [node name="Roy" parent="Combatants/Players" instance=ExtResource("5_char")]
-position = Vector2(430, 326)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 0, -0.75)
 character_definition = ExtResource("11_roy")
 
-[node name="Enemies" type="Node2D" parent="Combatants"]
-y_sort_enabled = true
+[node name="Enemies" type="Node3D" parent="Combatants"]
 
 [node name="Slime" parent="Combatants/Enemies" instance=ExtResource("5_char")]
-position = Vector2(680, 280)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -2.25)
 character_definition = ExtResource("12_slime")
 display_name_override = "Training Slime"
 
 [node name="BattleUI" parent="." node_paths=PackedStringArray("battle_manager", "camera") instance=ExtResource("6_ui")]
 battle_manager = NodePath("../TutorialManager")
-camera = NodePath("../BattleCameraController/Camera2D")
+camera = NodePath("../BattleCameraController/Camera3D")
 
 [node name="TutorialUI" parent="." instance=ExtResource("7_tui")]

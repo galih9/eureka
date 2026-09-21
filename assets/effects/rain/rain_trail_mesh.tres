@@ -1,0 +1,14 @@
+[gd_resource type="RibbonTrailMesh" load_steps=3 format=3 uid="uid://dg0u81y7laye1"]
+
+[ext_resource type="Material" uid="uid://c8qy4w1823rmn" path="res://assets/effects/rain/rain_ribbon_material.tres" id="1_mat"]
+
+[sub_resource type="Curve" id="Curve_streak"]
+_data = [Vector2(0, 0.25), 0.0, 0.0, 0, 0, Vector2(0.12, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[resource]
+material = ExtResource("1_mat")
+size = 0.025
+sections = 4
+section_length = 0.08
+curve = SubResource("Curve_streak")

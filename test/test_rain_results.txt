@@ -1,0 +1,16 @@
+=== RUNNING RAIN EFFECT SYSTEM TESTS (GODOT 4.7.2) ===
+[PASS] rain_effect.tscn loaded successfully.
+[PASS] RainEffect instantiated and added to scene tree.
+[PASS] RainParticles has trail_enabled = true.
+[PASS] draw_pass_1 is RibbonTrailMesh.
+[PASS] Ribbon material has use_particle_trails = true.
+Calculated Rain Direction (Wind from East, 18 deg): (-0.309017, -0.951057, 0.0)
+Calculated Lean Angle: 18.00 degrees (expected 18.00)
+[PASS] Easterly wind slant mathematically verified (leans westward by 18°).
+[PASS] Dynamic update to 25.0° lean angle verified: 25.00°
+[PASS] Drizzle preset applied correctly (density=250, width=0.012).
+[PASS] Custom intensity parameters verified (density=350, opacity=0.22, width=0.014).
+[PASS] SplashParticles sub-emitter bound and active.
+[PASS] rain_showcase.tscn loaded and instantiated cleanly with ground collision and shelter.
+[PASS] battle_scene.tscn instantiated with BattlefieldArena/RainEffect active.
+=== ALL RAIN EFFECT TESTS COMPLETED SUCCESSFULLY ===

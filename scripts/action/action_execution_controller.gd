@@ -7,6 +7,8 @@ extends RefCounted
 
 signal action_finished(action: BattleAction)
 
+const HitVFX = preload("res://scripts/effects/hit_vfx.gd")
+
 var camera_controller: BattleCameraController = null
 var turn_timeline: TurnTimeline = null
 var formation_system: FormationSystem = null
@@ -77,7 +79,7 @@ func execute(action: BattleAction, on_complete: Callable) -> void:
 			on_complete.call()
 		return
 		
-	var target_pos = primary_target.global_position if primary_target != null and is_instance_valid(primary_target) else (actor.global_position if is_instance_valid(actor) else Vector2.ZERO)
+	var target_pos = primary_target.global_position if primary_target != null and is_instance_valid(primary_target) else (actor.global_position if is_instance_valid(actor) else Vector3.ZERO)
 
 	
 	# Handle ITEM: user requested "for using item for now just use attack animation"
@@ -222,6 +224,17 @@ func _resolve_hits(action: BattleAction, skill_def: SkillDefinition, will_zoom: 
 		elif result.hit:
 			hit_recipient.take_damage(result.damage, result.damage_type)
 			hit_recipient.play_hit_anim(result.critical)
+			
+			# Spawn Attack Hit VFX
+			var vfx_name: StringName = &"slash"
+			var a_def = action.action_definition
+			if a_def != null:
+				vfx_name = a_def.get_vfx_name(actor)
+				
+			var vfx_pos = hit_recipient.hit_origin.global_position if hit_recipient.hit_origin != null else (hit_recipient.global_position + Vector3(0.0, 0.45, 0.0))
+			var flip_vfx = (actor != null and actor.team == 1)
+			var vfx_parent = hit_recipient.get_parent() if hit_recipient.get_parent() != null else hit_recipient
+			HitVFX.spawn(vfx_parent, vfx_pos, vfx_name, flip_vfx, result.critical)
 			
 			# Lifesteal check (Ingrid Transform perk)
 			if actor.lifesteal_percent > 0.0:

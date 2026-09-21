@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://d3aeny7mnqgpo"]
+
+[ext_resource type="Texture2D" uid="uid://b1866vlhe3gj" path="res://assets/textures/texture_01.png" id="1_uuuws"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yf5fn"]
+albedo_texture = ExtResource("1_uuuws")
+uv1_scale = Vector3(10, 10, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g4v7s"]
+material = SubResource("StandardMaterial3D_yf5fn")
+size = Vector3(20, 1, 20)
+
+[node name="Node3D" type="Node3D" unique_id=756557053]
+
+[node name="Node3D" type="MeshInstance3D" parent="." unique_id=861025482]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("BoxMesh_g4v7s")
+metadata/_edit_group_ = true

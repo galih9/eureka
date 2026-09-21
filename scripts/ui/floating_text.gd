@@ -1,14 +1,14 @@
 class_name FloatingText
 extends Label
 
-var world_position: Vector2 = Vector2.ZERO
-var camera: Camera2D = null
+var world_position: Vector3 = Vector3.ZERO
+var camera: Camera3D = null
 var lifetime: float = 1.0
 var elapsed: float = 0.0
 
-func setup(text_str: String, p_world_pos: Vector2, p_camera: Camera2D, color: Color, is_crit: bool = false, is_miss: bool = false) -> void:
+func setup(text_str: String, p_world_pos: Vector3, p_camera: Camera3D, color: Color, is_crit: bool = false, is_miss: bool = false) -> void:
 	text = text_str
-	world_position = p_world_pos + Vector2(0.0, -42.0)
+	world_position = p_world_pos + Vector3(0.0, 1.4, 0.0)
 	camera = p_camera
 	
 	modulate = color
@@ -31,13 +31,16 @@ func setup(text_str: String, p_world_pos: Vector2, p_camera: Camera2D, color: Co
 	tw.tween_callback(queue_free)
 
 func _process(delta: float) -> void:
-	world_position.y -= delta * 36.0
+	world_position.y += delta * 0.9
 	_update_screen_position()
 
 func _update_screen_position() -> void:
 	if camera != null and is_instance_valid(camera):
-		var canvas_transform = camera.get_canvas_transform()
-		var screen_pos = canvas_transform * world_position
-		position = screen_pos - size * 0.5
+		if not camera.is_position_behind(world_position):
+			var screen_pos = camera.unproject_position(world_position)
+			position = screen_pos - size * 0.5
+			visible = true
+		else:
+			visible = false
 	else:
-		position = world_position - size * 0.5
+		visible = true

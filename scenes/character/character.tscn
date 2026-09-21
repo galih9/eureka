@@ -2,9 +2,13 @@
 
 [ext_resource type="SpriteFrames" path="res://data/character_sprite_frames.tres" id="1_frames"]
 
-[node name="Character" type="Node2D" unique_id=1234330079]
+[node name="Character" type="Node3D" unique_id=1234330079]
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=393406691]
-scale = Vector2(2.4, 2.4)
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="." unique_id=393406691]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.395, 0)
+billboard = 2
+texture_filter = 0
+alpha_cut = 1
+pixel_size = 0.025
 sprite_frames = ExtResource("1_frames")
 animation = &"idle"

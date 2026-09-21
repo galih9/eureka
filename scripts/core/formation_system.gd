@@ -19,8 +19,8 @@ const FRONT_COM_SPEED_MULT: float = 1.30
 const REAR_ACT_SPEED_MULT: float = 1.35
 
 # Slot positions arrays: index = col * 4 + row
-var player_slots_pos: Array[Vector2] = []
-var enemy_slots_pos: Array[Vector2] = []
+var player_slots_pos: Array[Vector3] = []
+var enemy_slots_pos: Array[Vector3] = []
 
 # Occupancy tracking: index -> BattleCharacter (or null)
 var player_occupancy: Array = []
@@ -40,33 +40,36 @@ func _init_slots() -> void:
 	enemy_occupancy.resize(TOTAL_SLOTS)
 	enemy_occupancy.fill(null)
 	
-	# Player Side (Flipped horizontally):
-	# Col 0 (Rear, x=192), Col 1 (Mid, x=332), Col 2 (Front, x=472)
-	# Slant: dx = -42, dy = 46
-	var player_base_x = [192.0, 332.0, 472.0]
+	# Player Side (Left side of 3D arena, X < 0, Y = 0 on ground):
+	# Col 0 (Rear, x=-5.0), Col 1 (Mid, x=-3.5), Col 2 (Front, x=-2.0)
+	# Rows 0..3 spread across Z (-2.25 to +2.25) with slight slant dx = -0.25 * row
+	var player_base_x = [-5.0, -3.5, -2.0]
+	var row_z = [-2.25, -0.75, 0.75, 2.25]
 	for col in range(COLS):
 		for row in range(ROWS):
-			var pos = Vector2(
-				player_base_x[col] - float(row) * 42.0,
-				280.0 + float(row) * 46.0
+			var pos = Vector3(
+				player_base_x[col] - float(row) * 0.25,
+				0.0,
+				row_z[row]
 			)
 			player_slots_pos.append(pos)
 			
-	# Enemy Side:
-	# Col 0 (Front, x=680), Col 1 (Mid, x=820), Col 2 (Rear, x=960)
-	# Slant: dx = +42, dy = 46
-	var enemy_base_x = [680.0, 820.0, 960.0]
+	# Enemy Side (Right side of 3D arena, X > 0, Y = 0 on ground):
+	# Col 0 (Front, x=2.0), Col 1 (Mid, x=3.5), Col 2 (Rear, x=5.0)
+	# Rows 0..3 spread across Z (-2.25 to +2.25) with slight slant dx = +0.25 * row
+	var enemy_base_x = [2.0, 3.5, 5.0]
 	for col in range(COLS):
 		for row in range(ROWS):
-			var pos = Vector2(
-				enemy_base_x[col] + float(row) * 42.0,
-				280.0 + float(row) * 46.0
+			var pos = Vector3(
+				enemy_base_x[col] + float(row) * 0.25,
+				0.0,
+				row_z[row]
 			)
 			enemy_slots_pos.append(pos)
 
-func get_slot_position(team: int, slot_index: int) -> Vector2:
+func get_slot_position(team: int, slot_index: int) -> Vector3:
 	if slot_index < 0 or slot_index >= TOTAL_SLOTS:
-		return Vector2.ZERO
+		return Vector3.ZERO
 	if team == 0:
 		return player_slots_pos[slot_index]
 	else:
@@ -115,9 +118,11 @@ func occupy_slot(character: BattleCharacter, slot_index: int) -> bool:
 	
 	occupancy[slot_index] = character
 	character.formation_slot = slot_index
-	character.global_position = get_slot_position(character.team, slot_index)
-	character.position = character.global_position
-	character.initial_position = character.global_position
+	var slot_pos = get_slot_position(character.team, slot_index)
+	character.position = slot_pos
+	if character.is_inside_tree():
+		character.global_position = slot_pos
+	character.initial_position = slot_pos
 	return true
 
 func vacate_character(character: BattleCharacter) -> void:

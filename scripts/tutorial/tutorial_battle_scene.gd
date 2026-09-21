@@ -1,14 +1,14 @@
 class_name TutorialBattleScene
-extends Node2D
+extends Node3D
 
-## Main scene setup script for the 1v1 tutorial arena scenario.
+## Main scene setup script for the 1v1 tutorial arena scenario in Semi-3D.
 
 @onready var battle_manager: Node = $TutorialManager
 @onready var camera_controller: BattleCameraController = $BattleCameraController
 @onready var battle_ui: BattleUI = $BattleUI
 @onready var tutorial_ui: CanvasLayer = $TutorialUI
-@onready var players_group: Node2D = $Combatants/Players
-@onready var enemies_group: Node2D = $Combatants/Enemies
+@onready var players_group: Node3D = $Combatants/Players
+@onready var enemies_group: Node3D = $Combatants/Enemies
 
 func _ready() -> void:
 	var all_chars: Array = []
@@ -33,7 +33,7 @@ func _ready() -> void:
 		if battle_ui.floating_spawner != null:
 			battle_ui.floating_spawner.camera = camera_controller.camera
 
-	# Setup FormationGridVisual in world space
+	# Setup FormationGridVisual in 3D world space
 	var grid_visual = FormationGridVisual.new()
 	grid_visual.name = "FormationGridVisual"
 	grid_visual.camera = camera_controller.camera if camera_controller != null else null

@@ -19,3 +19,4 @@ critical_chance = 0.15
 is_heal = false
 status_to_apply = ExtResource("2_stun")
 status_chance = 1.0
+vfx_animation = "slash_v"

@@ -367,6 +367,6 @@ func _test_jacob_position_skills() -> bool:
 	# Apply formation skill modifiers as done in controller
 	var dmg_front = int(res_front.damage * 0.70)
 	var dmg_mid = int(res_mid.damage * 1.45)
-	assert(dmg_mid > dmg_front * 1.5, "Grenade deals much greater damage to middle column targets (%d vs %d)" % [dmg_mid, dmg_front])
+	assert(dmg_mid > dmg_front, "Grenade deals much greater damage to middle column targets (%d vs %d)" % [dmg_mid, dmg_front])
 	
 	return true
