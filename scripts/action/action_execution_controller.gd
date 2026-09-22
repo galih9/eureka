@@ -13,6 +13,11 @@ var camera_controller: BattleCameraController = null
 var turn_timeline: TurnTimeline = null
 var formation_system: FormationSystem = null
 
+## Delay after attack animation completes while camera lingers on damaged target
+var post_attack_delay: float = 0.65
+## Delay after item usage completes before camera returns to stage
+var post_item_delay: float = 0.50
+
 func _init(p_cam_controller: BattleCameraController = null, p_timeline: TurnTimeline = null, p_formation: FormationSystem = null) -> void:
 	camera_controller = p_cam_controller
 	turn_timeline = p_timeline
@@ -51,7 +56,7 @@ func execute(action: BattleAction, on_complete: Callable) -> void:
 		actor.is_defending = true
 		actor.set_highlight(true)
 		var timer_tween = actor.create_tween()
-		timer_tween.tween_interval(0.45)
+		timer_tween.tween_interval(0.55)
 		timer_tween.tween_callback(func():
 			actor.set_highlight(false)
 			if camera_controller != null:
@@ -85,16 +90,28 @@ func execute(action: BattleAction, on_complete: Callable) -> void:
 	# Handle ITEM: user requested "for using item for now just use attack animation"
 	if action_def.action_type == ActionDefinition.ActionType.ITEM:
 		var on_item_use = func():
-			if will_zoom and camera_controller != null and primary_target != null:
+			if camera_controller != null and primary_target != null:
 				camera_controller.focus_on_target(primary_target)
 			_resolve_item(action, primary_target)
 		var on_item_finish = func():
-			if camera_controller != null:
-				camera_controller.return_to_stage()
-			if events:
-				events.action_finished.emit(action)
-			if on_complete.is_valid():
-				on_complete.call()
+			var tree = actor.get_tree() if actor != null and actor.is_inside_tree() else null
+			if tree != null:
+				var timer = tree.create_timer(post_item_delay)
+				timer.timeout.connect(func():
+					if camera_controller != null:
+						camera_controller.return_to_stage()
+					if events:
+						events.action_finished.emit(action)
+					if on_complete.is_valid():
+						on_complete.call()
+				)
+			else:
+				if camera_controller != null:
+					camera_controller.return_to_stage()
+				if events:
+					events.action_finished.emit(action)
+				if on_complete.is_valid():
+					on_complete.call()
 		actor.play_item_anim(target_pos, on_item_use, on_item_finish)
 		return
 		
@@ -104,12 +121,26 @@ func execute(action: BattleAction, on_complete: Callable) -> void:
 	var on_attack_hit = func():
 		_resolve_hits(action, skill_def, will_zoom)
 	var on_attack_finish = func():
-		if camera_controller != null:
-			camera_controller.return_to_stage()
-		if events:
-			events.action_finished.emit(action)
-		if on_complete.is_valid():
-			on_complete.call()
+		# Attacker animation has completed. Hold camera on target / damage outcome for post_attack_delay
+		# before smoothly returning to viewing the arena again.
+		var tree = actor.get_tree() if actor != null and actor.is_inside_tree() else null
+		if tree != null:
+			var timer = tree.create_timer(post_attack_delay)
+			timer.timeout.connect(func():
+				if camera_controller != null:
+					camera_controller.return_to_stage()
+				if events:
+					events.action_finished.emit(action)
+				if on_complete.is_valid():
+					on_complete.call()
+			)
+		else:
+			if camera_controller != null:
+				camera_controller.return_to_stage()
+			if events:
+				events.action_finished.emit(action)
+			if on_complete.is_valid():
+				on_complete.call()
 	actor.play_attack_anim(target_pos, on_attack_hit, on_attack_finish, is_melee)
 
 func _resolve_move(action: BattleAction, on_complete: Callable) -> void:
@@ -156,6 +187,20 @@ func _resolve_item(action: BattleAction, target: BattleCharacter) -> void:
 	
 	if events:
 		events.damage_dealt.emit(res)
+		
+	# Dynamic 3D Healing Light
+	var heal_light = OmniLight3D.new()
+	heal_light.name = "HealItemLight"
+	heal_light.light_color = Color(0.25, 1.0, 0.55)
+	heal_light.light_energy = 3.2
+	heal_light.omni_range = 3.8
+	heal_light.omni_attenuation = 1.4
+	var p = target.get_parent() if target.get_parent() != null else target
+	p.add_child(heal_light)
+	heal_light.global_position = target.global_position + Vector3(0.0, 0.5, 0.0)
+	var h_tw = heal_light.create_tween()
+	h_tw.tween_property(heal_light, "light_energy", 0.0, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	h_tw.tween_callback(heal_light.queue_free)
 
 func _resolve_hits(action: BattleAction, skill_def: SkillDefinition, will_zoom: bool = false) -> void:
 	var actor = action.actor
@@ -281,10 +326,11 @@ func _resolve_hits(action: BattleAction, skill_def: SkillDefinition, will_zoom: 
 			if camera_controller != null:
 				if result.critical:
 					camera_controller.focus_on_critical_hit(hit_recipient)
-				elif will_zoom:
-					camera_controller.focus_on_target(hit_recipient)
+				elif TargetSystem.is_aoe(action.action_definition.target_type):
+					camera_controller.focus_on_group(action.targets)
 				else:
-					camera_controller.shake(0.28)
+					camera_controller.focus_on_target(hit_recipient)
+					camera_controller.shake(0.30)
 				
 			if events:
 				if result.critical:

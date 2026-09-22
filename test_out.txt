@@ -1,4 +1,13 @@
 Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
 
---- BEGINNING COMPREHENSIVE COMBAT TESTS ---
-TEST 1 - Initial living enemies: 0
+--- Running Full Battle Scene Integration Test ---
+  [SUCCESS] Instantiated BattleScene
+  [SIMULATED INPUT] Player turn ready for: Ingrid
+  [SIMULATED INPUT] Player targeting: Slime
+  [COMBAT EVENT] Action finished: Attack by Ingrid (Total actions: 1)
+  [COMBAT EVENT] Action finished: Attack by Slug (Total actions: 2)
+  Simulation finished at frame 2225
+  Total actions executed: 2
+  Living players: 3
+  Living enemies: 3
+  [PASS] Full combat cycle (Timeline -> Decision -> Action Execution -> Result -> Perks -> Resume) verified!

@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://c5q3xly7rain0"]
+[gd_scene load_steps=9 format=3 uid="uid://c5q3xly7rain0"]
 
 [ext_resource type="Script" uid="uid://di4dqjmtcqwm7" path="res://scripts/effects/rain_effect.gd" id="1_rain_script"]
 [ext_resource type="Material" uid="uid://bwm4r58g1278q" path="res://assets/effects/rain/rain_process_material.tres" id="2_proc_mat"]
 [ext_resource type="RibbonTrailMesh" uid="uid://dg0u81y7laye1" path="res://assets/effects/rain/rain_trail_mesh.tres" id="3_mesh"]
 [ext_resource type="Material" uid="uid://csplashproc001" path="res://assets/effects/rain/splash_process_material.tres" id="4_spl_proc"]
 [ext_resource type="Material" uid="uid://dpsplshmat001" path="res://assets/effects/rain/splash_material.tres" id="5_spl_mat"]
+[ext_resource type="AudioStream" uid="uid://rsnej684m2ss" path="res://assets/audio/rain_loop.ogg" id="6_rain_audio"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_splash"]
 material = ExtResource("5_spl_mat")
@@ -34,3 +35,8 @@ randomness = 0.4
 visibility_aabb = AABB(-25, -2, -25, 50, 5, 50)
 process_material = ExtResource("4_spl_proc")
 draw_pass_1 = SubResource("QuadMesh_splash")
+
+[node name="RainAudioPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_rain_audio")
+volume_db = 3.0
+autoplay = true

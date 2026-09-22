@@ -3,12 +3,16 @@ extends CanvasLayer
 
 ## Root Battle UI manager connecting state transitions, menus, targeting, and HUD layers.
 
+signal battle_start_displayed()
+
 @export var battle_manager: BattleManager
 @export var camera: Camera3D
 ## The grid visual lives in the world scene (not in this CanvasLayer) so the
 ## camera transform is applied correctly when zoomed in.
 @export var grid_visual: FormationGridVisual = null
 
+@onready var timeline_layer: Control = $TimelineLayer
+@onready var character_status_layer: Control = $CharacterStatusLayer
 @onready var timeline_ui: TimelineUI = $TimelineLayer/TimelineUI
 @onready var status_ui: CharacterStatusUI = $CharacterStatusLayer/CharacterStatusUI
 @onready var command_menu: CommandMenuUI = $CommandLayer/CommandMenuUI
@@ -21,6 +25,15 @@ extends CanvasLayer
 @onready var end_title: Label = $TransitionLayer/EndPanel/VBox/EndTitle
 @onready var restart_btn: Button = $TransitionLayer/EndPanel/VBox/RestartBtn
 
+@onready var intro_layer: Control = get_node_or_null("IntroLayer")
+@onready var skip_hint: Control = get_node_or_null("IntroLayer/SkipHint")
+@onready var battle_start_container: Control = get_node_or_null("IntroLayer/BattleStartContainer")
+@onready var battle_start_title: Label = get_node_or_null("IntroLayer/BattleStartContainer/VBox/BattleStartTitle")
+
+var is_intro_active: bool = false
+var intro_banner_tween: Tween = null
+var skip_hint_tween: Tween = null
+
 var valid_targets: Array = []
 var selected_target_idx: int = 0
 var is_targeting: bool = false
@@ -32,9 +45,14 @@ var debug_menu: Control = null
 var debug_toggle_btn: Button = null
 
 func _ready() -> void:
+	_ensure_intro_ui()
 	target_prompt_panel.visible = false
 	action_banner.visible = false
 	transition_panel.visible = false
+	if battle_start_container:
+		battle_start_container.visible = false
+	if skip_hint:
+		skip_hint.visible = false
 	# Note: grid_visual signals are connected in battle_scene.gd after the node
 	# is created, because grid_visual is null here (assigned post-_ready).
 	
@@ -114,6 +132,13 @@ func connect_battle_manager(bm: BattleManager) -> void:
 		bm.battle_finished.connect(_on_battle_finished)
 	if not bm.battle_initialized.is_connected(_on_battle_initialized):
 		bm.battle_initialized.connect(_on_battle_initialized)
+	if not bm.battle_intro_started.is_connected(_on_battle_intro_started):
+		bm.battle_intro_started.connect(_on_battle_intro_started)
+	if not bm.battle_intro_finished.is_connected(_on_battle_intro_finished):
+		bm.battle_intro_finished.connect(_on_battle_intro_finished)
+		
+	if bm.current_state == BattleState.State.INTRO:
+		_on_intro_started()
 	
 	if grid_visual != null and bm.formation_system != null:
 		grid_visual.formation_system = bm.formation_system
@@ -142,7 +167,11 @@ func _on_state_changed(new_state: BattleState.State) -> void:
 			status_ui.setup_party(living_players)
 			
 	match new_state:
+		BattleState.State.INTRO:
+			_on_intro_started()
+			
 		BattleState.State.TIMELINE:
+			_on_intro_concluded()
 			is_targeting = false
 			if is_moving:
 				is_moving = false
@@ -233,6 +262,12 @@ func _clear_target_highlights() -> void:
 			t.set_target_selected(false)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_intro_active:
+		if _is_skip_intro_input(event):
+			_skip_intro()
+			get_viewport().set_input_as_handled()
+			return
+			
 	if not is_targeting:
 		return
 		
@@ -377,3 +412,231 @@ func _on_grid_move_canceled() -> void:
 		grid_visual.cancel_move_selection()
 	if battle_manager != null:
 		battle_manager.cancel_target_selection()
+
+# --- Intro Sequence & "Battle Start" Announcement ---
+
+func _on_battle_intro_started() -> void:
+	_on_intro_started()
+
+func _on_battle_intro_finished() -> void:
+	_on_intro_concluded()
+
+func _on_intro_started() -> void:
+	if is_intro_active:
+		return
+	is_intro_active = true
+	_ensure_intro_ui()
+	
+	# Keep battle combat HUD hidden during cinematic camera sweep
+	if timeline_layer:
+		timeline_layer.modulate.a = 0.0
+	if character_status_layer:
+		character_status_layer.modulate.a = 0.0
+	if command_menu:
+		command_menu.hide_menu()
+	if target_prompt_panel:
+		target_prompt_panel.visible = false
+		
+	# Display pulsing skip hint
+	if skip_hint:
+		skip_hint.visible = true
+		skip_hint.modulate.a = 0.0
+		if skip_hint_tween and skip_hint_tween.is_valid():
+			skip_hint_tween.kill()
+		skip_hint_tween = create_tween().set_loops()
+		skip_hint_tween.tween_property(skip_hint, "modulate:a", 0.9, 0.75)
+		skip_hint_tween.tween_property(skip_hint, "modulate:a", 0.4, 0.75)
+		
+	# Schedule the "Battle Start" banner at ~3.0s as camera zooms in to stage position
+	if intro_banner_tween and intro_banner_tween.is_valid():
+		intro_banner_tween.kill()
+		
+	var delay = 3.0
+	if battle_manager != null and battle_manager.get("intro_duration") != null:
+		delay = max(0.4, battle_manager.intro_duration - 1.9)
+		
+	intro_banner_tween = create_tween()
+	intro_banner_tween.tween_interval(delay)
+	intro_banner_tween.tween_callback(func():
+		_show_battle_start_banner()
+	)
+
+func _show_battle_start_banner() -> void:
+	battle_start_displayed.emit()
+	if battle_start_container == null:
+		return
+		
+	battle_start_container.visible = true
+	battle_start_container.modulate.a = 0.0
+	battle_start_container.scale = Vector2(1.35, 1.35)
+	
+	if intro_banner_tween and intro_banner_tween.is_valid():
+		intro_banner_tween.kill()
+		
+	intro_banner_tween = create_tween()
+	# Impact punch: scale down with back ease & rapid fade-in
+	intro_banner_tween.parallel().tween_property(battle_start_container, "scale", Vector2(1.0, 1.0), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	intro_banner_tween.parallel().tween_property(battle_start_container, "modulate:a", 1.0, 0.15)
+	
+	# Hold for visual impact
+	intro_banner_tween.chain().tween_interval(1.15)
+	
+	# Smooth fade out as combat commences
+	intro_banner_tween.chain().parallel().tween_property(battle_start_container, "scale", Vector2(1.08, 1.08), 0.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	intro_banner_tween.parallel().tween_property(battle_start_container, "modulate:a", 0.0, 0.4)
+	intro_banner_tween.chain().tween_callback(func():
+		if battle_start_container:
+			battle_start_container.visible = false
+	)
+
+func _on_intro_concluded() -> void:
+	is_intro_active = false
+	
+	# Stop skip hint
+	if skip_hint_tween and skip_hint_tween.is_valid():
+		skip_hint_tween.kill()
+	if skip_hint:
+		skip_hint.visible = false
+		
+	# Smoothly reveal standard battle HUD
+	var hud_tween = create_tween().set_parallel(true)
+	if timeline_layer:
+		hud_tween.tween_property(timeline_layer, "modulate:a", 1.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if character_status_layer:
+		hud_tween.tween_property(character_status_layer, "modulate:a", 1.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+func _is_skip_intro_input(event: InputEvent) -> bool:
+	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
+		return true
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_SPACE or event.keycode == KEY_ENTER or event.keycode == KEY_ESCAPE:
+			return true
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_RIGHT:
+			return true
+	return false
+
+func _skip_intro() -> void:
+	if not is_intro_active:
+		return
+		
+	is_intro_active = false
+	battle_start_displayed.emit()
+	
+	# Quick flash of "Battle Start" if it hasn't popped up yet
+	if battle_start_container and not battle_start_container.visible:
+		battle_start_container.visible = true
+		battle_start_container.scale = Vector2(1.2, 1.2)
+		battle_start_container.modulate.a = 1.0
+		if intro_banner_tween and intro_banner_tween.is_valid():
+			intro_banner_tween.kill()
+		var quick_tw = create_tween()
+		quick_tw.parallel().tween_property(battle_start_container, "scale", Vector2(1.0, 1.0), 0.15)
+		quick_tw.chain().tween_interval(0.3)
+		quick_tw.chain().parallel().tween_property(battle_start_container, "modulate:a", 0.0, 0.2)
+		quick_tw.chain().tween_callback(func():
+			if battle_start_container:
+				battle_start_container.visible = false
+		)
+		
+	if battle_manager != null and battle_manager.has_method("skip_intro"):
+		battle_manager.skip_intro()
+		
+	_on_intro_concluded()
+
+func _ensure_intro_ui() -> void:
+	if intro_layer == null:
+		intro_layer = get_node_or_null("IntroLayer") as Control
+		
+	if intro_layer == null:
+		intro_layer = Control.new()
+		intro_layer.name = "IntroLayer"
+		intro_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		intro_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(intro_layer)
+		
+	if skip_hint == null and intro_layer != null:
+		skip_hint = intro_layer.get_node_or_null("SkipHint") as Control
+	if skip_hint == null and intro_layer != null:
+		var sh_panel = PanelContainer.new()
+		sh_panel.name = "SkipHint"
+		sh_panel.anchor_left = 1.0
+		sh_panel.anchor_top = 1.0
+		sh_panel.anchor_right = 1.0
+		sh_panel.anchor_bottom = 1.0
+		sh_panel.offset_left = -220.0
+		sh_panel.offset_top = -46.0
+		sh_panel.offset_right = -18.0
+		sh_panel.offset_bottom = -16.0
+		sh_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		sh_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		
+		var sh_style = StyleBoxFlat.new()
+		sh_style.bg_color = Color(0.05, 0.08, 0.16, 0.72)
+		sh_style.border_color = Color(0.3, 0.55, 0.85, 0.6)
+		sh_style.set_border_width_all(1)
+		sh_style.set_corner_radius_all(4)
+		sh_panel.add_theme_stylebox_override("panel", sh_style)
+		
+		var lbl = Label.new()
+		lbl.name = "SkipLabel"
+		lbl.text = "[SPACE / CLICK TO SKIP]"
+		lbl.add_theme_font_size_override("font_size", 11)
+		lbl.add_theme_color_override("font_color", Color(0.85, 0.92, 1, 0.8))
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		sh_panel.add_child(lbl)
+		intro_layer.add_child(sh_panel)
+		skip_hint = sh_panel
+		skip_hint.visible = false
+		
+	if battle_start_container == null and intro_layer != null:
+		battle_start_container = intro_layer.get_node_or_null("BattleStartContainer") as Control
+	if battle_start_container == null and intro_layer != null:
+		var bs_panel = PanelContainer.new()
+		bs_panel.name = "BattleStartContainer"
+		bs_panel.anchor_left = 0.5
+		bs_panel.anchor_top = 0.5
+		bs_panel.anchor_right = 0.5
+		bs_panel.anchor_bottom = 0.5
+		bs_panel.offset_left = -220.0
+		bs_panel.offset_top = -54.0
+		bs_panel.offset_right = 220.0
+		bs_panel.offset_bottom = 54.0
+		bs_panel.pivot_offset = Vector2(220, 54)
+		
+		var bs_style = StyleBoxFlat.new()
+		bs_style.bg_color = Color(0.04, 0.07, 0.15, 0.92)
+		bs_style.border_color = Color(1, 0.84, 0.22, 0.95)
+		bs_style.border_width_left = 3
+		bs_style.border_width_right = 3
+		bs_style.border_width_top = 2
+		bs_style.border_width_bottom = 2
+		bs_style.set_corner_radius_all(6)
+		bs_panel.add_theme_stylebox_override("panel", bs_style)
+		
+		var vbox = VBoxContainer.new()
+		vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		
+		var sub = Label.new()
+		sub.text = "TACTICAL COMBAT ENGAGED"
+		sub.add_theme_font_size_override("font_size", 11)
+		sub.add_theme_color_override("font_color", Color(0.35, 0.75, 1, 0.9))
+		sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(sub)
+		
+		var main_l = Label.new()
+		main_l.name = "BattleStartTitle"
+		main_l.text = "⚔ BATTLE START ⚔"
+		main_l.add_theme_font_size_override("font_size", 32)
+		main_l.add_theme_color_override("font_color", Color(1, 0.88, 0.22, 1))
+		main_l.add_theme_color_override("font_outline_color", Color(0.08, 0.04, 0, 0.95))
+		main_l.add_theme_constant_override("outline_size", 6)
+		main_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(main_l)
+		
+		bs_panel.add_child(vbox)
+		intro_layer.add_child(bs_panel)
+		battle_start_container = bs_panel
+		battle_start_title = main_l
+		battle_start_container.visible = false

@@ -13,6 +13,8 @@ signal battle_initialized()
 signal captain_changed(new_captain: BattleCharacter)
 signal party_strategy_changed(new_strategy: PartyAI.PartyStrategy)
 signal autonomous_action_triggered(character: BattleCharacter, reason: String)
+signal battle_intro_started()
+signal battle_intro_finished()
 
 @export var camera_controller: BattleCameraController
 @export var default_attack_skill: ActionDefinition
@@ -20,6 +22,10 @@ signal autonomous_action_triggered(character: BattleCharacter, reason: String)
 @export var default_move_action: ActionDefinition
 @export var enemies_container: Node3D
 @export var players_container: Node3D
+
+@export_group("Intro Sequence")
+@export var enable_arena_intro: bool = true
+@export var intro_duration: float = 5.0
 
 var current_state: BattleState.State = BattleState.State.INTRO
 var all_combatants: Array = [] # Array[BattleCharacter]
@@ -38,6 +44,7 @@ var pending_action_def: ActionDefinition = null
 var com_queue: Array = [] # Array[BattleCharacter] waiting for player input
 var is_active: bool = false
 var state_timer: float = 0.0
+var is_intro_skipping: bool = false
 
 func _ready() -> void:
 	if default_move_action == null:
@@ -74,8 +81,18 @@ func initialize_battle(combatants: Array) -> void:
 				
 	turn_timeline.initialize(all_combatants)
 	is_active = true
-	state_timer = 0.5
-	change_state(BattleState.State.INTRO)
+	is_intro_skipping = false
+	
+	if enable_arena_intro:
+		state_timer = intro_duration
+		change_state(BattleState.State.INTRO)
+		battle_intro_started.emit()
+		if camera_controller != null and camera_controller.has_method("play_arena_intro"):
+			camera_controller.play_arena_intro(intro_duration)
+	else:
+		state_timer = 0.0
+		change_state(BattleState.State.TIMELINE)
+		
 	battle_initialized.emit()
 
 func _assign_initial_formation_slots() -> void:
@@ -156,9 +173,26 @@ func _process(delta: float) -> void:
 	if current_state == BattleState.State.INTRO:
 		state_timer -= delta
 		if state_timer <= 0.0:
-			change_state(BattleState.State.TIMELINE)
+			finish_intro()
 	elif current_state == BattleState.State.TIMELINE:
 		_process_timeline(delta)
+
+## Skips the intro sequence immediately, commanding camera to settle and advancing to TIMELINE state
+func skip_intro() -> void:
+	if current_state != BattleState.State.INTRO or is_intro_skipping:
+		return
+	is_intro_skipping = true
+	state_timer = 0.0
+	if camera_controller != null and camera_controller.has_method("skip_arena_intro"):
+		camera_controller.skip_arena_intro()
+	finish_intro()
+
+## Concludes the intro sequence and transitions into TIMELINE combat flow
+func finish_intro() -> void:
+	if current_state != BattleState.State.INTRO:
+		return
+	battle_intro_finished.emit()
+	change_state(BattleState.State.TIMELINE)
 
 func change_state(new_state: BattleState.State) -> void:
 	current_state = new_state
@@ -398,8 +432,8 @@ func _on_action_finished(action: BattleAction) -> void:
 	if events:
 		events.turn_ended.emit(action.actor)
 		
-	# Short tactical pause for hit result / floating text readability
-	var pause_timer = get_tree().create_timer(0.4)
+	# Smooth tactical pause while camera finishes returning to stage overview
+	var pause_timer = get_tree().create_timer(0.45)
 	pause_timer.timeout.connect(func():
 		if not is_inside_tree() or not is_active:
 			return

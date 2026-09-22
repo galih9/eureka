@@ -116,15 +116,65 @@ enum WeatherIntensity {
 		enable_splashes = value
 		_update_rain_parameters()
 
+@export_group("Audio")
+## Automatically play looping rain ambient sound in-game
+@export var enable_rain_audio: bool = true:
+	set(value):
+		enable_rain_audio = value
+		if rain_audio_player:
+			if value and not Engine.is_editor_hint():
+				if not rain_audio_player.playing:
+					rain_audio_player.play()
+			else:
+				rain_audio_player.stop()
+
+@export_range(-40.0, 12.0, 0.5) var rain_volume_db: float = 3.0:
+	set(value):
+		rain_volume_db = value
+		if rain_audio_player:
+			rain_audio_player.volume_db = value
+
+@export var rain_audio_stream: AudioStream = preload("res://assets/audio/rain_loop.ogg")
+
 @export_group("Camera / Player Tracking")
 ## Optional node (e.g. Camera3D or Player) to smoothly track on the X/Z plane.
 @export var follow_target: Node3D = null
 
 @onready var rain_particles: GPUParticles3D = $RainParticles
 @onready var splash_particles: GPUParticles3D = $SplashParticles
+@onready var rain_audio_player: AudioStreamPlayer = get_node_or_null("RainAudioPlayer") as AudioStreamPlayer
 
 func _ready() -> void:
 	_update_rain_parameters()
+	if not Engine.is_editor_hint():
+		_setup_rain_audio()
+
+func _setup_rain_audio() -> void:
+	if rain_audio_player == null:
+		rain_audio_player = get_node_or_null("RainAudioPlayer") as AudioStreamPlayer
+	if rain_audio_player == null:
+		rain_audio_player = AudioStreamPlayer.new()
+		rain_audio_player.name = "RainAudioPlayer"
+		add_child(rain_audio_player)
+		
+	if rain_audio_player.stream == null and rain_audio_stream != null:
+		rain_audio_player.stream = rain_audio_stream
+		
+	if rain_audio_player.stream is AudioStreamOggVorbis:
+		(rain_audio_player.stream as AudioStreamOggVorbis).loop = true
+		
+	rain_audio_player.volume_db = rain_volume_db
+	rain_audio_player.bus = &"Master"
+	
+	if not rain_audio_player.finished.is_connected(_on_rain_audio_finished):
+		rain_audio_player.finished.connect(_on_rain_audio_finished)
+		
+	if enable_rain_audio and not rain_audio_player.playing:
+		rain_audio_player.play()
+
+func _on_rain_audio_finished() -> void:
+	if is_inside_tree() and enable_rain_audio and rain_audio_player:
+		rain_audio_player.play()
 
 func _process(_delta: float) -> void:
 	if follow_target and is_instance_valid(follow_target):

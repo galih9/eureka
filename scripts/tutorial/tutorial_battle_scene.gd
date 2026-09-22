@@ -1,6 +1,8 @@
 class_name TutorialBattleScene
 extends Node3D
 
+const CombatAudioManager = preload("res://scripts/audio/combat_audio_manager.gd")
+
 ## Main scene setup script for the 1v1 tutorial arena scenario in Semi-3D.
 
 @onready var battle_manager: Node = $TutorialManager
@@ -43,6 +45,15 @@ func _ready() -> void:
 	grid_visual.slot_clicked.connect(battle_ui._on_grid_slot_clicked)
 	grid_visual.move_canceled.connect(battle_ui._on_grid_move_canceled)
 
+	# Setup Combat Audio
+	_setup_combat_audio()
+
 	# Initialize battle and UI
 	battle_manager.initialize_battle(all_chars)
 	battle_ui.connect_battle_manager(battle_manager)
+
+func _setup_combat_audio() -> void:
+	if CombatAudioManager.get_manager(self) == null:
+		var cam = CombatAudioManager.new()
+		cam.name = "CombatAudio"
+		add_child(cam)

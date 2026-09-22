@@ -30,6 +30,7 @@ var acid_dart_skill: SkillDefinition = preload("res://data/skills/tutorial_acid_
 var flinch_strike_skill: SkillDefinition = preload("res://data/skills/flinch_strike.tres")
 
 func _ready() -> void:
+	enable_arena_intro = false
 	super._ready()
 	
 	if tutorial_ui != null:

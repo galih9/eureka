@@ -533,24 +533,26 @@ func play_attack_anim(target_pos: Vector3, on_hit_frame: Callable, on_complete: 
 		
 		# 1. Dash toward target playing 'move' animation
 		play_move()
-		tween.tween_property(self, "global_position", strike_pos, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "global_position", strike_pos, 0.24).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		
-		# 2. Strike frame with 'attack' animation
+		# 2. Strike frame with 'attack' animation and follow-through impact hold
 		tween.tween_callback(func():
 			play_attack()
+			_spawn_attack_light()
 			var hit_timer = get_tree().create_timer(0.24)
 			hit_timer.timeout.connect(func():
 				if on_hit_frame.is_valid():
 					on_hit_frame.call()
 			)
 		)
-		tween.tween_interval(0.42)
+		# 0.60s interval gives 0.36s of post-hit follow-through hold for impact weight
+		tween.tween_interval(0.60)
 		
 		# 3. Retreat back to home position playing 'move'
 		tween.tween_callback(func():
 			play_move()
 		)
-		tween.tween_property(self, "global_position", initial_position, 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(self, "global_position", initial_position, 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 		
 		# 4. Return to idle
 		tween.tween_callback(func():
@@ -564,23 +566,58 @@ func play_attack_anim(target_pos: Vector3, on_hit_frame: Callable, on_complete: 
 		var step_pos = initial_position + Vector3(step_dir * 0.7, 0.0, 0.0)
 		
 		play_move()
-		tween.tween_property(self, "global_position", step_pos, 0.14)
+		tween.tween_property(self, "global_position", step_pos, 0.16)
 		tween.tween_callback(func():
 			play_attack()
+			_spawn_attack_light()
 			var hit_timer = get_tree().create_timer(0.24)
 			hit_timer.timeout.connect(func():
 				if on_hit_frame.is_valid():
 					on_hit_frame.call()
 			)
 		)
-		tween.tween_interval(0.42)
+		# 0.56s interval gives 0.32s of post-hit follow-through hold
+		tween.tween_interval(0.56)
 		
-		tween.tween_property(self, "global_position", initial_position, 0.18)
+		tween.tween_property(self, "global_position", initial_position, 0.20)
 		tween.tween_callback(func():
 			play_idle()
 			if on_complete.is_valid():
 				on_complete.call()
 		)
+
+## Spawns dynamic 3D OmniLight3D during attack strike
+func _spawn_attack_light() -> void:
+	if not is_inside_tree() and get_parent() == null:
+		return
+		
+	var light = OmniLight3D.new()
+	light.name = "AttackLight"
+	
+	var col = Color(1.0, 0.85, 0.45) # Warm golden-amber
+	if team == 1:
+		col = Color(1.0, 0.35, 0.35) # Reddish enemy flare
+	elif character_definition != null:
+		var cname = character_definition.codename.to_upper()
+		if "INGRID" in cname or "STRIKER" in cname:
+			col = Color(0.45, 0.85, 1.0) # Bright cyan
+		elif "JACOB" in cname or "SPECIALIST" in cname:
+			col = Color(0.85, 0.55, 1.0) # Purple/violet
+			
+	light.light_color = col
+	light.light_energy = 2.8
+	light.omni_range = 3.6
+	light.omni_attenuation = 1.6
+	
+	var spawn_pos = attack_origin.global_position if attack_origin != null else (global_position + Vector3(0.5, 0.45, 0.0))
+	var parent_node = get_parent() if get_parent() != null else self
+	parent_node.add_child(light)
+	light.global_position = spawn_pos
+	
+	if light.is_inside_tree():
+		var tw = light.create_tween()
+		tw.tween_property(light, "light_energy", 0.0, 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_callback(light.queue_free)
 
 ## Item usage animation in 3D
 func play_item_anim(target_pos: Vector3, on_use_frame: Callable, on_complete: Callable) -> void:
@@ -594,7 +631,7 @@ func play_item_anim(target_pos: Vector3, on_use_frame: Callable, on_complete: Ca
 	
 	var tween = create_tween()
 	play_move()
-	tween.tween_property(self, "global_position", step_pos, 0.14)
+	tween.tween_property(self, "global_position", step_pos, 0.16)
 	tween.tween_callback(func():
 		play_attack()
 		var action_timer = get_tree().create_timer(0.25)
@@ -603,9 +640,9 @@ func play_item_anim(target_pos: Vector3, on_use_frame: Callable, on_complete: Ca
 				on_use_frame.call()
 		)
 	)
-	tween.tween_interval(0.45)
+	tween.tween_interval(0.58)
 	
-	tween.tween_property(self, "global_position", initial_position, 0.18)
+	tween.tween_property(self, "global_position", initial_position, 0.20)
 	tween.tween_callback(func():
 		play_idle()
 		if on_complete.is_valid():

@@ -1,18 +1,37 @@
 [gd_scene format=3 uid="uid://d3aeny7mnqgpo"]
 
-[ext_resource type="Texture2D" uid="uid://b1866vlhe3gj" path="res://assets/textures/texture_01.png" id="1_uuuws"]
+[ext_resource type="PackedScene" uid="uid://bgikbbfwuxcin" path="res://assets/lpad.glb" id="1_lpad"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yf5fn"]
-albedo_texture = ExtResource("1_uuuws")
-uv1_scale = Vector3(10, 10, 10)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_deck"]
+albedo_color = Color(0.09, 0.11, 0.14, 1)
+metallic = 0.45
+roughness = 0.35
 
-[sub_resource type="BoxMesh" id="BoxMesh_g4v7s"]
-material = SubResource("StandardMaterial3D_yf5fn")
-size = Vector3(20, 1, 20)
+[sub_resource type="BoxMesh" id="BoxMesh_deck"]
+material = SubResource("StandardMaterial3D_deck")
+size = Vector3(17.5, 12, 9.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_border"]
+albedo_color = Color(0.92, 0.7, 0.12, 1)
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_border"]
+material = SubResource("StandardMaterial3D_border")
+size = Vector3(17.5, 0.02, 0.22)
 
 [node name="Node3D" type="Node3D" unique_id=756557053]
 
 [node name="Node3D" type="MeshInstance3D" parent="." unique_id=861025482]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-mesh = SubResource("BoxMesh_g4v7s")
-metadata/_edit_group_ = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, 0)
+mesh = SubResource("BoxMesh_deck")
+
+[node name="HazardBorderN" type="MeshInstance3D" parent="." unique_id=184910243]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, -4.5)
+mesh = SubResource("BoxMesh_border")
+
+[node name="HazardBorderS" type="MeshInstance3D" parent="." unique_id=928410291]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 4.5)
+mesh = SubResource("BoxMesh_border")
+
+[node name="BackgroundLandingPad" parent="." unique_id=35392268 instance=ExtResource("1_lpad")]
+transform = Transform3D(-1.122247, 0, -0.36464, 0.009545, 1.179596, -0.029377, 0.364515, -0.030889, -1.121862, -2.464097, -9.051996, -22.5)

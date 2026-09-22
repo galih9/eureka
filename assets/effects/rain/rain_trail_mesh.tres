@@ -1,4 +1,4 @@
-[gd_resource type="RibbonTrailMesh" load_steps=3 format=3 uid="uid://dg0u81y7laye1"]
+[gd_resource type="RibbonTrailMesh" format=3 uid="uid://dg0u81y7laye1"]
 
 [ext_resource type="Material" uid="uid://c8qy4w1823rmn" path="res://assets/effects/rain/rain_ribbon_material.tres" id="1_mat"]
 

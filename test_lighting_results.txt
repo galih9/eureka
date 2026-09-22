@@ -1,0 +1,17 @@
+========================================================
+   TESTING 3D COMBAT LIGHTS & THUNDER LIGHTNING SYSTEM   
+========================================================
+[PASS] 1. Darker atmospheric environment verified (ambient energy: 0.40000000596046)
+[PASS] 2. Darker directional key light verified (light energy: 0.10000000149012)
+thunder.thunder_player is null: false
+thunder._next_strike_timer: 5.9
+[PASS] 3. ThunderLightning node, audio player, and 6.0s initial timer verified
+rain.rain_audio_player is null: false
+[PASS] 4. RainEffect rain loop audio player verified and playing
+[PASS] 5. ThunderLightning flash and synchronized thunder audio verified
+[PASS] 6. HitVFX dynamic 3D OmniLight3D verified (energy: 3.59999990463257)
+[PASS] 7. Critical HitVFX produces brighter golden burst (energy: 5.19999980926514)
+[PASS] 8. BattleCharacter attack strike 3D OmniLight3D verified (energy: 2.79999995231628)
+========================================================
+  ALL 3D LIGHTING & THUNDER LIGHTNING TESTS PASSED!     
+========================================================

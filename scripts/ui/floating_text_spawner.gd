@@ -32,7 +32,7 @@ func _on_action_canceled(target: Node, _disruptor: Node, _result: RefCounted) ->
 		return
 	var cancel_label = FloatingText.new()
 	add_child(cancel_label)
-	cancel_label.setup("CANCEL!", target.global_position + Vector3(0, 1.2, 0), camera, Color(1.0, 0.35, 0.15), true, false)
+	cancel_label.setup("CANCEL!", target.global_position, camera, Color(1.0, 0.35, 0.15), true, false)
 
 func _on_attack_missed(result: AttackResult) -> void:
 	if result == null or result.target == null:

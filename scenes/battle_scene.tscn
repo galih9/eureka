@@ -8,12 +8,13 @@
 [ext_resource type="PackedScene" uid="uid://cp2vvh3n4lbl7" path="res://scenes/ui/battle_ui.tscn" id="6_ui"]
 [ext_resource type="Resource" path="res://data/skills/normal_attack.tres" id="7_atk"]
 [ext_resource type="Resource" path="res://data/skills/defend.tres" id="8_def"]
-[ext_resource type="Resource" path="res://data/characters/roy.tres" id="9_roy"]
-[ext_resource type="Resource" path="res://data/characters/ingrid.tres" id="10_ingrid"]
-[ext_resource type="Resource" path="res://data/characters/jacob.tres" id="11_jacob"]
+[ext_resource type="Resource" uid="uid://c34ptkidmccxr" path="res://data/characters/roy.tres" id="9_roy"]
+[ext_resource type="Resource" uid="uid://q4346bxusw0k" path="res://data/characters/ingrid.tres" id="10_ingrid"]
+[ext_resource type="Resource" uid="uid://ds6yyxaffjyrm" path="res://data/characters/jacob.tres" id="11_jacob"]
 [ext_resource type="Resource" path="res://data/enemies/slime.tres" id="13_slime"]
 [ext_resource type="Resource" path="res://data/enemies/slug.tres" id="14_slug"]
 [ext_resource type="Resource" path="res://data/skills/move.tres" id="15_move"]
+[ext_resource type="AudioStream" uid="uid://pt576ks5528j" path="res://assets/audio/bgm.mp3" id="16_bgm"]
 
 [node name="BattleScene" type="Node3D" unique_id=381481906]
 script = ExtResource("1_scene")
@@ -21,12 +22,13 @@ script = ExtResource("1_scene")
 [node name="BattlefieldArena" parent="." unique_id=1839542220 instance=ExtResource("2_arena")]
 
 [node name="BattleCameraController" type="Node3D" parent="." unique_id=1489816830 node_paths=PackedStringArray("camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 6)
 script = ExtResource("3_cam")
 camera = NodePath("Camera3D")
 
 [node name="Camera3D" type="Camera3D" parent="BattleCameraController" unique_id=1371024942]
-transform = Transform3D(1, 0, 0, 0, 0.930418, 0.366501, 0, -0.366501, 0.930418, 0, 5, 12.2)
-fov = 40.0
+transform = Transform3D(1, 0, 0, 0, 0.942641, 0.333807, 0, -0.333807, 0.942641, 0, 5.2, 11.8)
+fov = 38.0
 
 [node name="BattleManager" type="Node" parent="." unique_id=1019681988 node_paths=PackedStringArray("camera_controller", "enemies_container", "players_container")]
 script = ExtResource("4_mgr")
@@ -73,3 +75,8 @@ display_name_override = "Slug 1"
 [node name="BattleUI" parent="." unique_id=129187563 node_paths=PackedStringArray("battle_manager", "camera") instance=ExtResource("6_ui")]
 battle_manager = NodePath("../BattleManager")
 camera = NodePath("../BattleCameraController/Camera3D")
+
+[node name="BGMPlayer" type="AudioStreamPlayer" parent="." unique_id=987654321]
+stream = ExtResource("16_bgm")
+volume_db = -6.0
+autoplay = true

@@ -6,9 +6,10 @@ var camera: Camera3D = null
 var lifetime: float = 1.0
 var elapsed: float = 0.0
 
-func setup(text_str: String, p_world_pos: Vector3, p_camera: Camera3D, color: Color, is_crit: bool = false, is_miss: bool = false) -> void:
+func setup(text_str: String, p_world_pos: Vector3, p_camera: Camera3D, color: Color, is_crit: bool = false, is_miss: bool = false, custom_offset: Vector3 = Vector3(0.55, 0.70, 0.0)) -> void:
 	text = text_str
-	world_position = p_world_pos + Vector3(0.0, 1.4, 0.0)
+	# Positioned lower and slightly to the right so it stays clearly visible inside the camera frame
+	world_position = p_world_pos + custom_offset
 	camera = p_camera
 	
 	modulate = color
@@ -31,14 +32,20 @@ func setup(text_str: String, p_world_pos: Vector3, p_camera: Camera3D, color: Co
 	tw.tween_callback(queue_free)
 
 func _process(delta: float) -> void:
-	world_position.y += delta * 0.9
+	world_position.y += delta * 0.4
 	_update_screen_position()
 
 func _update_screen_position() -> void:
 	if camera != null and is_instance_valid(camera):
 		if not camera.is_position_behind(world_position):
 			var screen_pos = camera.unproject_position(world_position)
-			position = screen_pos - size * 0.5
+			var target_pos = screen_pos - size * 0.5
+			# Ensure text stays within screen boundaries and doesn't clip off the top of the camera
+			var vp_size = get_viewport_rect().size
+			if vp_size.y > 0 and vp_size.x > 0:
+				target_pos.y = clampf(target_pos.y, 45.0, vp_size.y - 45.0)
+				target_pos.x = clampf(target_pos.x, 25.0, vp_size.x - size.x - 25.0)
+			position = target_pos
 			visible = true
 		else:
 			visible = false

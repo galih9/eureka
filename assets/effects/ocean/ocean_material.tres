@@ -1,0 +1,68 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://b1kyiv6umie55"]
+
+[ext_resource type="Shader" uid="uid://bqy7fu68ygod3" path="res://shaders/ocean_waves.gdshader" id="1_shader"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_foam"]
+noise_type = 2
+frequency = 0.025
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_foam"]
+noise = SubResource("FastNoiseLite_foam")
+seamless = true
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_norm1"]
+noise_type = 3
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_norm1"]
+noise = SubResource("FastNoiseLite_norm1")
+seamless = true
+as_normal_map = true
+bump_strength = 3.5
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_norm2"]
+noise_type = 0
+frequency = 0.035
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_norm2"]
+noise = SubResource("FastNoiseLite_norm2")
+seamless = true
+as_normal_map = true
+bump_strength = 2.5
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/deep_color = Color(0.012, 0.032, 0.065, 0.98)
+shader_parameter/shallow_color = Color(0.028, 0.085, 0.14, 0.94)
+shader_parameter/horizon_color = Color(0.02, 0.03, 0.06, 1)
+shader_parameter/foam_color = Color(0.85, 0.92, 0.97, 0.95)
+shader_parameter/roughness = 0.08
+shader_parameter/metallic = 0.02
+shader_parameter/specular = 0.65
+shader_parameter/fresnel_power = 4.0
+shader_parameter/wave_a = Vector4(1, 0.25, 0.28, 45)
+shader_parameter/wave_b = Vector4(0.35, 0.95, 0.2, 26)
+shader_parameter/wave_c = Vector4(-0.65, 0.75, 0.14, 15)
+shader_parameter/wave_d = Vector4(-0.3, -1, 0.08, 8)
+shader_parameter/wave_steepness = 0.65
+shader_parameter/wave_speed = 1.0
+shader_parameter/wave_amplitude_mult = 1.0
+shader_parameter/normal_texture_1 = SubResource("NoiseTexture2D_norm1")
+shader_parameter/normal_texture_2 = SubResource("NoiseTexture2D_norm2")
+shader_parameter/ripple_direction_1 = Vector2(0.025, 0.015)
+shader_parameter/ripple_direction_2 = Vector2(-0.018, 0.022)
+shader_parameter/ripple_scale_1 = 0.04
+shader_parameter/ripple_scale_2 = 0.08
+shader_parameter/ripple_strength = 0.35
+shader_parameter/foam_noise_texture = SubResource("NoiseTexture2D_foam")
+shader_parameter/foam_noise_scale = 0.06
+shader_parameter/crest_foam_threshold = 0.28
+shader_parameter/crest_foam_softness = 0.18
+shader_parameter/edge_foam_distance = 0.75
+shader_parameter/edge_foam_intensity = 1.1
+shader_parameter/horizon_fade_start = 90.0
+shader_parameter/horizon_fade_end = 240.0

@@ -5,10 +5,16 @@ extends Node3D
 ## Handles dynamic framing, smooth 3D transitions, action tracking, and trauma screen shake.
 
 @export var camera: Camera3D
-@export var stage_position: Vector3 = Vector3(0.0, 5.0, 12.2)
-@export var stage_rotation_pitch: float = -21.5 ## Pitch angle in degrees
-@export var stage_fov: float = 40.0
-@export var normal_focus_chance: float = 0.20 # 20% chance to zoom on normal acts, 80% stays in stage view
+## When true (default), automatically initializes the stage position, rotation, and FOV from the Camera3D node's transform in the scene editor.
+@export var use_camera_node_transform: bool = true
+@export var stage_position: Vector3 = Vector3(0.0, 5.2, 11.8)
+@export var stage_rotation_pitch: float = -19.5: ## Pitch angle in degrees
+	set(value):
+		stage_rotation_pitch = value
+		stage_rotation.x = deg_to_rad(value)
+@export var stage_rotation: Vector3 = Vector3(deg_to_rad(-19.5), 0.0, 0.0) ## Base Euler rotation (pitch, yaw, roll)
+@export var stage_fov: float = 38.0
+@export var normal_focus_chance: float = 0.75 # 75% chance to zoom on normal acts, 25% stays in stage view
 
 @export_group("Critical Hit FX")
 @export var crit_slowdown_enabled: bool = true
@@ -17,11 +23,25 @@ extends Node3D
 @export var crit_fov: float = 26.0 ## Camera FOV on critical hit
 @export var crit_shake_trauma: float = 0.65 ## Screen shake trauma on critical hit
 
-var current_base_pos: Vector3 = Vector3(0.0, 5.0, 12.2)
-var current_base_fov: float = 40.0
+@export_group("Intro Cinematic")
+@export var intro_duration: float = 5.0
+@export var intro_start_position: Vector3 = Vector3(6.8, 7.2, 15.8)
+@export var intro_start_rotation_degrees: Vector3 = Vector3(-21.0, 15.0, -1.2)
+@export var intro_start_fov: float = 50.0
+@export var intro_mid_position: Vector3 = Vector3(-3.2, 6.0, 13.6)
+@export var intro_mid_rotation_degrees: Vector3 = Vector3(-18.5, -7.0, 0.8)
+@export var intro_mid_fov: float = 44.0
+
+signal intro_completed()
+
+var current_base_pos: Vector3 = Vector3(0.0, 5.2, 11.8)
+var current_base_rot: Vector3 = Vector3.ZERO
+var current_base_fov: float = 38.0
 var _is_in_slowmo: bool = false
 
 var active_tween: Tween = null
+var intro_tween: Tween = null
+var is_intro_active: bool = false
 var current_shot_type: String = "STAGE"
 var tracking_actor: BattleCharacter = null
 
@@ -41,12 +61,22 @@ func _ready() -> void:
 	if camera == null:
 		camera = get_node_or_null("Camera3D")
 		
+	if camera != null and use_camera_node_transform:
+		stage_position = camera.position
+		stage_rotation = camera.rotation
+		stage_rotation_pitch = rad_to_deg(camera.rotation.x)
+		stage_fov = camera.fov
+	else:
+		if stage_rotation == Vector3.ZERO and not is_zero_approx(stage_rotation_pitch):
+			stage_rotation = Vector3(deg_to_rad(stage_rotation_pitch), 0.0, 0.0)
+
 	current_base_pos = stage_position
+	current_base_rot = stage_rotation
 	current_base_fov = stage_fov
 	
 	if camera != null:
 		camera.position = stage_position
-		camera.rotation = Vector3(deg_to_rad(stage_rotation_pitch), 0.0, 0.0)
+		camera.rotation = stage_rotation
 		camera.fov = stage_fov
 
 func _process(delta: float) -> void:
@@ -59,7 +89,7 @@ func _process(delta: float) -> void:
 		current_base_pos = current_base_pos.lerp(track_target, delta * 7.0)
 		
 	# Process trauma shake in 3D
-	var base_rot = Vector3(deg_to_rad(stage_rotation_pitch), 0.0, 0.0)
+	var base_rot = current_base_rot
 	if trauma > 0.0:
 		trauma = max(0.0, trauma - delta * trauma_decay)
 		var shake_amount = trauma * trauma
@@ -84,8 +114,8 @@ func _process(delta: float) -> void:
 func shake(amount: float = 0.3) -> void:
 	trauma = clamp(trauma + amount, 0.0, 1.0)
 
-## Smooth transition to target 3D position and FOV
-func transition_to(target_pos: Vector3, target_fov: float, duration: float = 0.38) -> void:
+## Smooth transition to target 3D position, rotation and FOV
+func transition_to(target_pos: Vector3, target_fov: float, duration: float = 0.38, target_rot: Vector3 = stage_rotation) -> void:
 	if camera == null:
 		return
 		
@@ -97,7 +127,98 @@ func transition_to(target_pos: Vector3, target_fov: float, duration: float = 0.3
 	active_tween.set_ease(Tween.EASE_OUT)
 	
 	active_tween.tween_property(self, "current_base_pos", target_pos, duration)
+	active_tween.tween_property(self, "current_base_rot", target_rot, duration)
 	active_tween.tween_property(self, "current_base_fov", target_fov, duration)
+
+## Plays a cinematic arena sweep before the battle starts.
+## Lasts total duration (default 5.0s), showing the arena from around and zooming into stage view.
+func play_arena_intro(duration: float = -1.0) -> void:
+	if camera == null:
+		intro_completed.emit()
+		return
+		
+	var anim_duration = duration if duration > 0.0 else intro_duration
+	
+	if active_tween != null and active_tween.is_valid():
+		active_tween.kill()
+	if intro_tween != null and intro_tween.is_valid():
+		intro_tween.kill()
+		
+	is_intro_active = true
+	current_shot_type = "INTRO"
+	tracking_actor = null
+	
+	var start_pos = intro_start_position
+	var start_rot = Vector3(
+		deg_to_rad(intro_start_rotation_degrees.x),
+		deg_to_rad(intro_start_rotation_degrees.y),
+		deg_to_rad(intro_start_rotation_degrees.z)
+	)
+	var start_fov = intro_start_fov
+	
+	var mid_pos = intro_mid_position
+	var mid_rot = Vector3(
+		deg_to_rad(intro_mid_rotation_degrees.x),
+		deg_to_rad(intro_mid_rotation_degrees.y),
+		deg_to_rad(intro_mid_rotation_degrees.z)
+	)
+	var mid_fov = intro_mid_fov
+	
+	var end_pos = stage_position
+	var end_rot = stage_rotation
+	var end_fov = stage_fov
+	
+	current_base_pos = start_pos
+	current_base_rot = start_rot
+	current_base_fov = start_fov
+	camera.position = start_pos
+	camera.rotation = start_rot
+	camera.fov = start_fov
+	
+	var part1_time = anim_duration * 0.48
+	var part2_time = anim_duration * 0.52
+	
+	intro_tween = create_tween()
+	
+	# Part 1: Wide angled overview sweeping across the arena
+	intro_tween.parallel().tween_property(self, "current_base_pos", mid_pos, part1_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	intro_tween.parallel().tween_property(self, "current_base_rot", mid_rot, part1_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	intro_tween.parallel().tween_property(self, "current_base_fov", mid_fov, part1_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	
+	# Part 2: Dynamic zoom-in and alignment to standard battle stage
+	intro_tween.chain().parallel().tween_property(self, "current_base_pos", end_pos, part2_time).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	intro_tween.chain().parallel().tween_property(self, "current_base_rot", end_rot, part2_time).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	intro_tween.chain().parallel().tween_property(self, "current_base_fov", end_fov, part2_time).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	
+	intro_tween.chain().tween_callback(func():
+		is_intro_active = false
+		current_shot_type = "STAGE"
+		intro_completed.emit()
+	)
+
+## Skips the intro camera sequence immediately, smoothly blending or snapping to stage view
+func skip_arena_intro(quick_blend: bool = true) -> void:
+	if not is_intro_active:
+		return
+		
+	if intro_tween != null and intro_tween.is_valid():
+		intro_tween.kill()
+		
+	is_intro_active = false
+	current_shot_type = "STAGE"
+	
+	if quick_blend:
+		transition_to(stage_position, stage_fov, 0.18, stage_rotation)
+	else:
+		current_base_pos = stage_position
+		current_base_rot = stage_rotation
+		current_base_fov = stage_fov
+		if camera != null:
+			camera.position = stage_position
+			camera.rotation = stage_rotation
+			camera.fov = stage_fov
+			
+	intro_completed.emit()
 
 # --- Camera Transition Sequence ---
 
@@ -106,7 +227,7 @@ func return_to_stage(duration: float = 0.42) -> void:
 	current_shot_type = "STAGE"
 	tracking_actor = null
 	restore_time_scale()
-	transition_to(stage_position, stage_fov, duration)
+	transition_to(stage_position, stage_fov, duration, stage_rotation)
 
 func return_to_idle() -> void:
 	return_to_stage()
